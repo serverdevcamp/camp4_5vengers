@@ -1,12 +1,6 @@
 <template>
     <v-container fluid grid-list-md con>
-        <v-layout row wrap grid-list-md layout>
-            <!-- nav 바 -->
-            <v-flex md1 class="bar-nav" fixed>
-                <v-img :src="require('../assets/user.png')" class="icon-nav"></v-img>
-                <v-img :src="require('../assets/speech-bubble.png')" class="icon-nav"></v-img>
-                <v-img :src="require('../assets/etc.png')" class="icon-nav"></v-img>
-            </v-flex>
+        <v-layout row wrap layout>
 
             <!-- 친구 목록  -->
             <v-flex md11>
@@ -32,7 +26,7 @@
                     </v-flex>
                     <v-flex row wrap grid-list-md ml-1 p-0>
                         <v-avatar wrap p-0 m-0>
-                            <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain></v-img>
+                            <v-img :src="require('../assets/ming.jpeg')" class="img-user" contain></v-img>
                         </v-avatar>
 
                         <v-flex>
@@ -60,11 +54,13 @@
                     </v-flex>
                 </v-flex>
             </v-flex>
+
         </v-layout>
     </v-container>
 </template>
 
 <script>
+
 export default {
   data () {
     return {
@@ -87,18 +83,6 @@ export default {
     height: 100vh;
     padding: 0%;
     margin: 0%;
-}
-.bar-nav {
-    /* justify-content: center; */
-    width: 100%;
-    height: 100%;
-    background-color: #423630;
-    align-content: center;
-}
-.icon-nav {
-    width: 50%;
-    margin-left: 25%;
-    margin-top: 20%;
 }
 
 .icon-alarm, .icon-friend {
