@@ -1,8 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import TodoPage from '@/components/TodoPage'
-
 import SignInRoutes from './signIn'
 import SignUpRoutes from './signUp'
 import HomeRoutes from './home'
@@ -16,13 +14,6 @@ export default new Router({
     SignInRoutes,
     SignUpRoutes,
     HomeRoutes,
-    RoomRoutes,
-    
-
-    {
-      path: '/todo',
-      name: 'TodoPage',
-      component: TodoPage
-    }
+    RoomRoutes
   ]
 })

@@ -1,12 +1,6 @@
 <template>
     <v-container fluid grid-list-md con>
         <v-layout row wrap grid-list-md layout>
-            <!-- nav 바 -->
-            <v-flex md1 class="bar-nav" fixed>
-                <v-img :src="require('../assets/user.png')" class="icon-nav"></v-img>
-                <v-img :src="require('../assets/speech-bubble.png')" class="icon-nav"></v-img>
-                <v-img :src="require('../assets/etc.png')" class="icon-nav"></v-img>
-            </v-flex>
 
             <!-- 채팅 목록  -->
             <v-flex md11>
