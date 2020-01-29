@@ -53,7 +53,6 @@
         </v-layout>
     </v-container>
 </template>
-
 <script>
 export default {
   data () {
@@ -65,7 +64,6 @@ export default {
   computed: {}
 }
 </script>
-
 <style scoped>
 .con {
     width: 100%;
@@ -90,16 +88,13 @@ export default {
     margin-left: 25%;
     margin-top: 20%;
 }
-
 .icon-alarm, .icon-friend {
     width: 30px;
 }
-
 .text-nick {
     font-size: 0.9em;
     font-weight : bold;
 }
-
 .text-chat {
     font-size: 0.7em;
     color : #767676;
