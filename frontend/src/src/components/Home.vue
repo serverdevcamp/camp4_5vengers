@@ -164,18 +164,6 @@ export default {
     width: 100%;
     color: #ffffff;
 }
-.profileDetailChatImg {
-    /* position: absolute;
-    width: 50px; */
-    /* left: 10%; */
-    /* top: 70%; */
-}
-.profileDetailEditImg {
-    /* position: absolute;
-    width: 50px; */
-    /* left: 10%; */
-    /* top: 80%; */
-}
 .profileIconDiv {
     text-align: center;
 }
