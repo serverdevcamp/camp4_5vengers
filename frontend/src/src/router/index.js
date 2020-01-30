@@ -5,6 +5,7 @@ import SignInRoutes from './signIn'
 import SignUpRoutes from './signUp'
 import HomeRoutes from './home'
 import RoomRoutes from './room'
+import RoomDetailsRoutes from './roomDetails'
 
 Vue.use(Router)
 
@@ -14,6 +15,8 @@ export default new Router({
     SignInRoutes,
     SignUpRoutes,
     HomeRoutes,
-    RoomRoutes
+    RoomRoutes,
+    RoomDetailsRoutes,
+
   ]
 })
