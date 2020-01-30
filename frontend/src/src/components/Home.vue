@@ -45,7 +45,7 @@
                     </v-flex>
                     <v-flex row wrap grid-list-md ml-1 p-0>
                         <v-avatar wrap p-0 m-0>
-                            <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain></v-img>
+                            <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain @click="friendProfileClicked=true"></v-img>
                         </v-avatar>
 
                         <v-flex>
@@ -80,7 +80,7 @@
             </v-dialog>
 
             <!-- 친구 프로필 상세보기 -->
-            <v-dialog v-model="myProfileClicked" max-width="350">
+            <v-dialog v-model="friendProfileClicked" max-width="350">
                 <v-card class="profileCard">
                     <!-- 배경 사진 -->
                     <img src="../assets/ming.jpeg" class="profileDetailBack"/>
@@ -90,19 +90,10 @@
                     <span class="profileDetailText">홍길동</span>
                     <span class="profileDetailText" style="top:69%">상태메세지</span>
 
-                    <div class="row" style="text-align:center;">
-                        <div class="col-6" style="position:absolute; top: 76%; left:15%; width:50px;"><img src="../assets/speech-bubble.png" style="width:50px;"/></div>
-                        <div class="col-6" style="position:absolute; top: 76%; left:64%; width:50px"><img src="../assets/profile-edit.png" style="width:50px;"/></div>
-                    </div>
-
-                    <div class="row" style="text-align:center;">
-                        <div class="col-6" style="position:absolute; top: 85%; left:1%; color: #ffffff;"><span>나와의 채팅</span></div>
-                        <div class="col-6" style="position:absolute; top: 85%; left:50%; color: #ffffff;"><span>프로필 관리</span></div>
-                    </div>
+                    <img src="../assets/speech-bubble.png" style="position:absolute; top:77%; left:43%; width: 50px;"/>
+                    <span style="position:absolute; top:85%; left:39.5%; color: #ffffff;">나와의 채팅</span>
                 </v-card>
             </v-dialog>
-
-            <!-- 모르는 사람 프로필 상세보기 -->
 
         </v-layout>
     </v-container>
@@ -113,7 +104,8 @@
 export default {
   data () {
     return {
-      myProfileClicked: false
+      myProfileClicked: false,
+      friendProfileClicked: false
     }
   },
   methods: {

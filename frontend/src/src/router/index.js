@@ -16,7 +16,6 @@ export default new Router({
     SignUpRoutes,
     HomeRoutes,
     RoomRoutes,
-    RoomDetailsRoutes,
-
+    RoomDetailsRoutes
   ]
 })
