@@ -8,7 +8,7 @@
                     </v-avatar>
 
                     <v-flex>
-                        <v-flex wrap class="chat-name" text-md-center mx-1 pb-1 md1>패밀리</v-flex>
+                        <v-flex wrap v-model="room_name" class="chat-name" v-bind:value="room_name" text-md-center mx-1 pb-1 md1>패밀리</v-flex>
                         <v-flex row grid-list-md ml-3 p-0>
                             <!-- <v-flex class="icon-num" text-md-left md1 pb-0> -->
                                 <img src="../assets/user.png" class="icon-user"/>
@@ -19,7 +19,9 @@
                     </v-flex>
                     <v-flex text-md-right>
                         <!--설정 아이콘-->
-                        <img src="../assets/settings.png" class="icon-settings"/>
+                        <v-avatar class="icon-settings"> 
+                            <img src="../assets/settings.png" contain @click="settingsClicked=true"/>
+                        </v-avatar>
                     </v-flex>
                 </v-flex>
         </v-flex>
@@ -49,6 +51,21 @@
                 </v-flex>
             </v-flex>
         </v-flex>
+
+        <!-- 설정 클릭 -->
+        <form @submit.prevent="settingsMethod">
+            <v-dialog @close.prevent="settingsMethod" v-model="settingsClicked" max-width="380">
+                <v-card class="settingsCard">
+                    <v-flex wrap column grid-list-md align-center lt-sign>
+                        <div class="profileDetailText">채팅방 이름</div>
+                        <v-text-field class="room_text" solo v-bind:placeholder="room_name" v-model="room_name" required></v-text-field>
+                        <v-btn medium color="normal" class='btn-login' type="submit">수정</v-btn>
+                    </v-flex>
+                </v-card>
+            </v-dialog>
+        </form>
+        <!-- 설정 클릭 -->
+
     </v-layout>
 </template>
 
@@ -56,10 +73,18 @@
 export default {
   data () {
     return {
+        settingsClicked: false,
+        room_name: 'ㅎㅎㅇ',
 
     }
   },
   methods: {
+      settingsMethod () {
+          const object = {
+              room_name: this.room_name,
+
+          }
+      }
   },
   computed: {}
 }
@@ -124,7 +149,7 @@ export default {
     margin-left: 1%;
 }
 .icon-settings {
-    width: 30px;
+    width: 20px;
 }
 .icon-clip {
     width:25px;
@@ -143,5 +168,36 @@ export default {
     margin: 0;
     padding: 0;
 
+}
+.settingsCard {
+    /* justify-items: center; */
+    position: relative;
+    width: 100%;
+    height: 20vh;
+    background-color: #fafafa;
+}
+.profileDetailText {
+    padding: 4%;
+    height: 25%;
+    font-size : 1.3em;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+}
+.btn-login {
+    width: 20%;
+    padding: 0%;
+}
+.room_text {
+    padding-top: 5%;
+    padding-left: 10%;
+    align-content: center;
+    width : 90%;
+    height: 10vh;
+}
+.lt-sign {
+    height: 100%;
+    align-content: center;
+    text-align: center;
 }
 </style>

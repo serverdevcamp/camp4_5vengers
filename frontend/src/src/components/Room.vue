@@ -18,7 +18,8 @@
                     <v-text-field placeholder="이름으로 검색" filled rounded dense hide-details="auto"></v-text-field>
                 </v-flex>
                 <!-- 채팅방 목록 -->
-                <v-flex column grid-list-md>
+                <router-link to="/roomDetails">
+                <v-flex column grid-list-md >
                     <!-- 2번 v-flex해서 공간 만들어주기 -->
                     <v-flex wrap text-md-left>
                     </v-flex>
@@ -42,6 +43,7 @@
                         </v-flex>
                     </v-flex>
                 </v-flex>
+                </router-link>
                 <!--채팅방 목록--->
             </v-flex>
         </v-layout>
@@ -88,6 +90,7 @@ export default {
 .text-nick {
     font-size: 0.9em;
     font-weight : bold;
+    color : black;
 }
 .text-chat {
     font-size: 0.7em;
