@@ -1,5 +1,20 @@
+.DS_Store
+
 # config
 config/
+
+/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 
 #controller
 controller/mail.js
@@ -12,6 +27,8 @@ routes/admin.js
 
 ### macOS ###
 # General
+../../.DS_Store
+../.DS_Store
 .DS_Store
 .AppleDouble
 .LSOverride
