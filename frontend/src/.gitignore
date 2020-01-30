@@ -27,6 +27,8 @@ routes/admin.js
 
 ### macOS ###
 # General
+../../.DS_Store
+../.DS_Store
 .DS_Store
 .AppleDouble
 .LSOverride
