@@ -54,14 +54,14 @@
 
 <script>
 export default {
-data () {
+  data () {
     return {
 
     }
-},
-methods: {
-},
-computed: {}
+  },
+  methods: {
+  },
+  computed: {}
 }
 </script>
 
