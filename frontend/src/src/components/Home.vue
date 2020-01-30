@@ -91,7 +91,7 @@
                     <span class="profileDetailText" style="top:69%">상태메세지</span>
 
                     <img src="../assets/speech-bubble.png" style="position:absolute; top:77%; left:43%; width: 50px;"/>
-                    <span style="position:absolute; top:85%; left:39.5%; color: #ffffff;">나와의 채팅</span>
+                    <span style="position:absolute; top:85%; left:42%; color: #ffffff;">1:1 채팅</span>
                 </v-card>
             </v-dialog>
 
