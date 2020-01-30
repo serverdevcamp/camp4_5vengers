@@ -65,17 +65,40 @@
                     <img src="../assets/empty-profile.png"  class="profileDetailFront"/>
 
                     <span class="profileDetailText">홍길동</span>
-                    <span class="profileDetailText" style="top:69%">상태메세지</span>
+                    <span class="profileDetailText" style="top:70%">상태메세지</span>
 
                     <div class="row" style="text-align:center;">
-                        <div class="col-6" style="position:absolute; top: 76%; left:15%; width:50px;"><img src="../assets/speech-bubble.png" style="width:50px;"/></div>
-                        <div class="col-6" style="position:absolute; top: 76%; left:64%; width:50px"><img src="../assets/profile-edit.png" style="width:50px;"/></div>
+                        <div class="col-6" style="position: absolute; top: 76%; left: 15%; width: 50px;"><img src="../assets/speech-bubble.png" style="width: 50px;"/></div>
+                        <div class="col-6" style="position: absolute; top: 76%; left: 64%; width: 50px; cursor: pointer;" @click="editProfileClicked=true; myProfileClicked=false;"><img src="../assets/profile-edit.png" style="width:50px;"/></div>
                     </div>
 
                     <div class="row" style="text-align:center;">
-                        <div class="col-6" style="position:absolute; top: 85%; left:1%; color: #ffffff;"><span>나와의 채팅</span></div>
-                        <div class="col-6" style="position:absolute; top: 85%; left:50%; color: #ffffff;"><span>프로필 관리</span></div>
+                        <div class="col-6" style="position: absolute; top: 85%; left:1%; color: #ffffff;"><span>나와의 채팅</span></div>
+                        <div class="col-6" style="position: absolute; top: 85%; left:50%; color: #ffffff; cursor: pointer;" @click="editProfileClicked=true; myProfileClicked=false;"><span>프로필 관리</span></div>
                     </div>
+                </v-card>
+            </v-dialog>
+
+            <!-- 내 프로필 수정  -->
+            <v-dialog v-model="editProfileClicked" max-width="350">
+                <v-card class="profileCard">
+                    <span style="position: absolute; left: 5%; top: 3%; color: #ffffff; cursor: pointer;" @click="editProfileClicked=false; myProfileClicked=true;">취소</span>
+                    <span style="position: absolute; right: 5%; top: 3%; color: #ffffff; cursor: pointer;" @click="editProfileClicked=false; myProfileClicked=true;">완료</span>
+
+                    <!-- 배경 사진 -->
+                    <img src="../assets/ming2.jpeg" class="profileDetailBack"/>
+                    <img src="../assets/camera.png" style="width: 10%; cursor: pointer; position: absolute; left: 44.5%; top: 20%;"/>
+
+                    <!-- 프로필 사진 -->
+                    <img src="../assets/empty-profile.png"  class="profileDetailFront"/>
+                    <img src="../assets/camera.png" style="width: 10%; cursor: pointer; position: absolute; left: 55%; top: 59%;"/>
+
+                    <!-- 닉네임 & 상태메세지 수정 -->
+                    <v-text-field class="editNickTF" dense v-bind:value="userNick" counter="20"></v-text-field>
+                    <img src="../assets/profile-edit.png" style="position: absolute; top: 67.5%; left: 85%; width: 5%;"/>
+                    <v-text-field class="editIntroTF" dense v-bind:value="userIntro" counter="20"></v-text-field>
+                    <img src="../assets/profile-edit.png" style="position: absolute; top: 74.5%; left: 85%; width: 5%;"/>
+
                 </v-card>
             </v-dialog>
 
@@ -88,7 +111,7 @@
                     <img src="../assets/empty-profile.png"  class="profileDetailFront"/>
 
                     <span class="profileDetailText">홍길동</span>
-                    <span class="profileDetailText" style="top:69%">상태메세지</span>
+                    <span class="profileDetailText" style="top:70%">상태메세지</span>
 
                     <img src="../assets/speech-bubble.png" style="position:absolute; top:77%; left:43%; width: 50px;"/>
                     <span style="position:absolute; top:85%; left:42%; color: #ffffff;">1:1 채팅</span>
@@ -100,17 +123,24 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 export default {
   data () {
     return {
       myProfileClicked: false,
-      friendProfileClicked: false
+      friendProfileClicked: false,
+      editProfileClicked: false
     }
   },
   methods: {
   },
-  computed: {}
+  computed: {
+    ...mapGetters({
+      userNick: 'nickInfo',
+      userIntro: 'introInfo'
+    })
+  }
 }
 </script>
 
@@ -142,7 +172,6 @@ export default {
     margin: 0%;
 }
 .profileCard {
-    /* justify-items: center; */
     position: relative;
 }
 .profileDetailBack {
@@ -159,12 +188,24 @@ export default {
 .profileDetailText {
     position: absolute;
     left: 0%;
-    top: 65%;
+    top: 66%;
     text-align: center;
     width: 100%;
     color: #ffffff;
 }
-.profileIconDiv {
-    text-align: center;
+.editNickTF >>> input, .editIntroTF >>> input {
+ text-align: center;
+}
+.editNickTF {
+  position: absolute;
+  left: 10%;
+  top: 66%;
+  width: 80%;
+}
+.editIntroTF {
+  position: absolute;
+  left: 10%;
+  top: 73%;
+  width: 80%;
 }
 </style>
