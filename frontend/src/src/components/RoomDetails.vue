@@ -85,7 +85,6 @@
 import io from 'socket.io-client'
 import moment from 'moment'
 import Vue from 'vue'
-var socket
 
 export default {
   data () {
@@ -94,16 +93,13 @@ export default {
       room_name: '패밀리',
       message: '',
       messages: [],
-      members: {}
-
+      members: {},
+      socket: null
     }
   },
   methods: {
-    socketCreate () {
-      socket = io.connect('http://localhost:3000', { transports: ['websocket'] })
-    },
     send: function () {
-      if (this.message !== '\n') socket.emit('send', this.message)
+      if (this.message !== '\n') this.socket.emit('send', this.message)
       this.message = ''
     },
     formatMemberDate: function (date) {
@@ -112,31 +108,33 @@ export default {
     formatMessageDate: function (date) {
       return moment(date).format('h:mm:ss a')
     },
-    socketDefault () {
-      socket.on('messages', function (message) {
+    socketConnect () {
+      // 소켓 연결
+      this.socket = io.connect('http://localhost:3000', { transports: ['websocket'] })
+
+      this.socket.on('messages', function (message) {
         this.messages.push(message)
       }.bind(this))
 
-      socket.on('member_add', function (member) {
+      this.socket.on('member_add', function (member) {
         Vue.set(this.members, member.socket, member)
       }.bind(this))
 
-      socket.on('member_delete', function (socketId) {
+      this.socket.on('member_delete', function (socketId) {
         Vue.delete(this.members, socketId)
       }.bind(this))
 
-      socket.on('message_history', function (messages) {
+      this.socket.on('message_history', function (messages) {
         this.messages = messages
       }.bind(this))
 
-      socket.on('member_history', function (members) {
+      this.socket.on('member_history', function (members) {
         this.members = members
       }.bind(this))
     }
   },
   mounted: function () {
-    this.socketCreate()
-    this.socketDefault()
+    this.socketConnect()
   }
 
 }

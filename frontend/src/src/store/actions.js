@@ -16,14 +16,14 @@ export const Actions = {
       else commit('signInFail', response.data)
     })
   },
-  sendMsg({ commit }, payload) {
-    console.log(payload);
+  sendMsg ({ commit }, payload) {
+    console.log(payload)
     axios.post('http://localhost:3000/example', payload).then(response => {
-      console.log("in");
-      console.log(response.status);
-      if (response.status == 200) commit('sendMsgSuccess', response.data)
+      console.log('in')
+      console.log(response.status)
+      if (response.status === 200) commit('sendMsgSuccess', response.data)
       else commit('sendMsgFail', response.data)
     })
-  },
-  
+  }
+
 }
