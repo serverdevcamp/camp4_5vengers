@@ -55,13 +55,13 @@
 export default {
   data () {
     return {
-        preUrl: '',
+      preUrl: ''
     }
   },
   methods: {
-      goDetails () {
-          this.$router.push('/roomDetails')
-      }
+    goDetails () {
+      this.$router.push('/roomDetails')
+    }
   },
   computed: {}
 }
