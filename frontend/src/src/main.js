@@ -11,6 +11,8 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'vuetify/dist/vuetify.min.css'
+import io from 'socket.io-client'; 
+var socket = io.connect('http://localhost:3000', {transports: ['websocket']});
 
 // import vueResource from 'vue-resource'
 
@@ -23,11 +25,38 @@ Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
+
 new Vue({
   el: '#app',
   router,
   vuetify: new Vuetify(),
   store,
+  socket,
   components: { App },
-  template: '<App/>'
+  template: '<App/>',
+
+  mounted: function() {
+    socket.on('messages', function(message) {
+        this.messages.push(message);
+    }.bind(this));
+
+    socket.on('member_add', function(member) {
+        Vue.set(this.members, member.socket, member);
+    }.bind(this));
+
+    socket.on('member_delete', function(socket_id) {
+        Vue.delete(this.members, socket_id);
+    }.bind(this));
+
+    socket.on('message_history', function(messages) {
+        console.log(messages);
+        this.messages = messages;
+    }.bind(this));
+
+    socket.on('member_history', function(members) {
+        console.log(members);
+        this.members = members;
+    }.bind(this));
+
+  }
 })

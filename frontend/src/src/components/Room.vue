@@ -18,32 +18,34 @@
                     <v-text-field placeholder="이름으로 검색" filled rounded dense hide-details="auto"></v-text-field>
                 </v-flex>
                 <!-- 채팅방 목록 -->
+                <!-- <router-link to="/roomDetails"> -->
                 <router-link to="/roomDetails">
-                <v-flex column grid-list-md >
-                    <!-- 2번 v-flex해서 공간 만들어주기 -->
-                    <v-flex wrap text-md-left>
-                    </v-flex>
-                    <v-flex wrap text-md-left>
-                    </v-flex>
-                    <v-flex row wrap grid-list-md ml-1 p-0>
-                        <v-avatar wrap p-0 m-0>
-                            <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain @click="this.$router.push('/roomDetails')"></v-img>
-                        </v-avatar>
+                    <v-flex column grid-list-md>
+                        <!-- 2번 v-flex해서 공간 만들어주기 -->
+                        <v-flex wrap text-md-left>
+                        </v-flex>
+                        <v-flex wrap text-md-left>
+                        </v-flex>
+                        <v-flex row wrap grid-list-md ml-1 p-0>
+                            <v-avatar wrap p-0 m-0>
+                                <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain></v-img>
+                            </v-avatar>
 
-                        <v-flex>
-                            <v-flex row grid-list-md ml-1 p-0>
-                                <v-flex wrap class="text-nick" text-md-left pb-0 md1>패밀리</v-flex>
-                                <v-flex wrap class="text-mem-num" text-md-left pb-0>4</v-flex>
+                            <v-flex>
+                                <v-flex row grid-list-md ml-1 p-0>
+                                    <v-flex wrap class="text-nick" text-md-left pb-0 md1>패밀리</v-flex>
+                                    <v-flex wrap class="text-mem-num" text-md-left pb-0>4</v-flex>
+                                </v-flex>
+                                <v-flex class="text-chat" text-md-left pt-0>안녕</v-flex>
                             </v-flex>
-                            <v-flex class="text-chat" text-md-left pt-0>야 너 밥먹었어??</v-flex>
-                        </v-flex>
-                        <v-flex>
-                            <v-flex class="text-time" text-md-right pb-0>오후 7:07</v-flex>
-                            <v-flex class="text-chat-num" text-md-right pt-0>60</v-flex>
+                            <v-flex>
+                                <v-flex class="text-time" text-md-right pb-0>오후 7:07</v-flex>
+                                <v-flex class="text-chat-num" text-md-right pt-0>60</v-flex>
+                            </v-flex>
                         </v-flex>
                     </v-flex>
-                </v-flex>
                 </router-link>
+                <!-- </router-link> -->
                 <!--채팅방 목록--->
             </v-flex>
         </v-layout>
@@ -53,9 +55,13 @@
 export default {
   data () {
     return {
+        preUrl: '',
     }
   },
   methods: {
+      goDetails () {
+          this.$router.push('/roomDetails')
+      }
   },
   computed: {}
 }

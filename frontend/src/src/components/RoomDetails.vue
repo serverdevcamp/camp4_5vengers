@@ -27,8 +27,18 @@
         </v-flex>
 
         <!-- 여기부터 채팅치는 구간 -->
-        <v-flex md9 class="middle-bar">
-
+        <v-flex md9 class="middle-bar" fixed>
+            <div class="row messages-body">
+                <div class="col-sm-12">
+                    <ul class="list-group message-group">
+                        <li v-for="(message, index) in messages" :key="index" track-by="$index">
+                            <img v-bind:src="message.front_img" class="rounded-circle float-left mr-2"> {{ message.message }}
+                            <!-- <hr> -->
+                            <small class="text-muted">{{ message.username }} @ {{ formatMessageDate(message.date) }}</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </v-flex>
         <!-- 여기까지 채팅치는 구간 -->
 
@@ -39,16 +49,18 @@
                 </v-flex>
             </v-flex>
             <v-flex class="bottom-bar-second" wrap>
-                <v-flex row wrap>
-                    <!-- 글자쓰는 곳 -->
-                    <v-flex md11 text-md-right class="text-msg">
-                        <v-textarea v-model = "msg" background-color = #ffffff full-width="true" auto-grow rounded></v-textarea>
+                <form @submit.prevent="send">
+                    <v-flex row wrap>
+                        <!-- 글자쓰는 곳 -->
+                        <v-flex md11 text-md-right class="text-msg">
+                            <v-textarea v-model ="message" v-on:keyup.enter="send" placeholder="메세지를 입력해주세요.." background-color = #ffffff auto-grow rounded></v-textarea>
+                        </v-flex>
+                        <v-flex md1 class="text-msg-button" text-md-right p-2 m-0>
+                            <!-- 전송 버튼 -->
+                            <v-btn type="submit" large>전송</v-btn>
+                        </v-flex>
                     </v-flex>
-                    <v-flex md1 class="text-msg-button" text-md-right p-2 m-0>
-                        <!-- 전송 버튼 -->
-                        <v-btn type="submit" large>전송</v-btn>
-                    </v-flex>
-                </v-flex>
+                </form>
             </v-flex>
         </v-flex>
 
@@ -69,26 +81,67 @@
     </v-layout>
 </template>
 
+
 <script>
+import io from 'socket.io-client'; 
+import moment from 'moment'
+var socket;
+
 export default {
   data () {
     return {
         settingsClicked: false,
-        room_name: 'ㅎㅎㅇ',
+        room_name: '패밀리',
+        message: '',
+        messages: [],
+        members: {},
 
     }
   },
   methods: {
-      settingsMethod () {
-          const object = {
-              room_name: this.room_name,
+    socketCreate() {
+      socket = io.connect('http://localhost:3000', { transports: ['websocket'] });
+    },
+    send: function() {
+      if(this.message != '\n') socket.emit('send', this.message);
+      this.message = '';
+    },
+    formatMemberDate: function(date) {
+      return moment(date).format("h:mm:ss a");
+    },
+    formatMessageDate: function(date) {
+      return moment(date).format("h:mm:ss a");
+    },
+    socketDefault() {
+      socket.on('messages', function(message) {
+        this.messages.push(message);
+      }.bind(this));
 
-          }
-      }
+      socket.on('member_add', function(member) {
+        Vue.set(this.members, member.socket, member);
+      }.bind(this));
+
+      socket.on('member_delete', function(socket_id) {
+        Vue.delete(this.members, socket_id);
+      }.bind(this));
+
+      socket.on('message_history', function(messages) {
+        this.messages = messages;
+      }.bind(this));
+
+      socket.on('member_history', function(members) {
+        this.members = members;
+      }.bind(this));
+    }
   },
-  computed: {}
+  mounted: function() {
+    this.socketCreate()
+    this.socketDefault()
+  }
+  
 }
 </script>
+
 
 <style scoped>
 .top-bar {
@@ -200,4 +253,79 @@ export default {
     align-content: center;
     text-align: center;
 }
+.navbar {
+    background-color: #f8981d;
+}
+
+.members {
+    position: fixed;
+    top: 54px;
+    bottom: 0;
+    left: 0;
+    /*z-index: 1000;*/
+    z-index: -1;
+    /*padding: 20px;*/
+    /*overflow-x: hidden;*/
+    overflow: auto;
+    /* Scrollable contents if viewport is shorter than content. */
+    border-right: 1px solid #eee;
+}
+
+.members-header {
+    background-color: #F5EDCD;
+    color: #545456;
+    font-size: 1.25rem;
+    padding-top: .25rem;
+    padding-bottom: .25rem;
+}
+
+.meessage-avatar {
+    float: left;
+    margin: 0px 15px 15px 0px;
+}
+
+.members-group {
+    width: 100%;
+}
+
+.messages-header {
+    background-color: #EAF0E8;
+    color: #545456;
+    font-size: 1.25rem;
+    padding-top: .25rem;
+    padding-bottom: .25rem;
+}
+
+.messages-main {
+    height: 90vh;
+}
+
+.messages-body {
+    padding-top: 1rem;
+    overflow: auto;
+    height: 75vh;
+}
+
+.messages-footer {
+    padding-top: 1rem;
+    padding-left: .25rem;
+    padding-right: .25rem;
+}
+
+.list-group-item {
+    border: none;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+
+}
+.list-group-item:first-child {
+    border-top: none;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+
+ul{
+   list-style: none;
+}
+
 </style>

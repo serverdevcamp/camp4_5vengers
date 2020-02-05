@@ -13,5 +13,15 @@ export const Mutations = {
     else if (payload.status === 204) console.log('해당하는 유저가 없습니다')
     else if (payload.status === 600) console.log('DB error')
     else if (payload.status === false) console.log('토큰 발행 에러')
+  },
+  sendMsgSuccess (state, payload) {
+    console.log(state);
+    console.log(payload);
+    console.log('sendMsgSuccess!!')
+  },
+  sendMsgFail (state, payload) {
+    console.log(state);
+    console.log(payload);
+    console.log('sendMsgFail!!')
   }
 }
