@@ -19,7 +19,7 @@
                     </v-flex>
                     <v-flex text-md-right>
                         <!--설정 아이콘-->
-                        <v-avatar class="icon-settings"> 
+                        <v-avatar class="icon-settings">
                             <img src="../assets/settings.png" contain @click="settingsClicked=true"/>
                         </v-avatar>
                     </v-flex>
@@ -81,67 +81,64 @@
     </v-layout>
 </template>
 
-
 <script>
-import io from 'socket.io-client'; 
+import io from 'socket.io-client'
 import moment from 'moment'
-var socket;
+import Vue from 'vue'
 
 export default {
   data () {
     return {
-        settingsClicked: false,
-        room_name: '패밀리',
-        message: '',
-        messages: [],
-        members: {},
-
+      settingsClicked: false,
+      room_name: '패밀리',
+      message: '',
+      messages: [],
+      members: {},
+      socket: null
     }
   },
   methods: {
-    socketCreate() {
-      socket = io.connect('http://localhost:3000', { transports: ['websocket'] });
+    send: function () {
+      if (this.message !== '\n') this.socket.emit('send', this.message)
+      this.message = ''
     },
-    send: function() {
-      if(this.message != '\n') socket.emit('send', this.message);
-      this.message = '';
+    formatMemberDate: function (date) {
+      return moment(date).format('h:mm:ss a')
     },
-    formatMemberDate: function(date) {
-      return moment(date).format("h:mm:ss a");
+    formatMessageDate: function (date) {
+      return moment(date).format('h:mm:ss a')
     },
-    formatMessageDate: function(date) {
-      return moment(date).format("h:mm:ss a");
-    },
-    socketDefault() {
-      socket.on('messages', function(message) {
-        this.messages.push(message);
-      }.bind(this));
+    socketConnect () {
+      // 소켓 연결
+      this.socket = io.connect('http://localhost:3000', { transports: ['websocket'] })
 
-      socket.on('member_add', function(member) {
-        Vue.set(this.members, member.socket, member);
-      }.bind(this));
+      this.socket.on('messages', function (message) {
+        this.messages.push(message)
+      }.bind(this))
 
-      socket.on('member_delete', function(socket_id) {
-        Vue.delete(this.members, socket_id);
-      }.bind(this));
+      this.socket.on('member_add', function (member) {
+        Vue.set(this.members, member.socket, member)
+      }.bind(this))
 
-      socket.on('message_history', function(messages) {
-        this.messages = messages;
-      }.bind(this));
+      this.socket.on('member_delete', function (socketId) {
+        Vue.delete(this.members, socketId)
+      }.bind(this))
 
-      socket.on('member_history', function(members) {
-        this.members = members;
-      }.bind(this));
+      this.socket.on('message_history', function (messages) {
+        this.messages = messages
+      }.bind(this))
+
+      this.socket.on('member_history', function (members) {
+        this.members = members
+      }.bind(this))
     }
   },
-  mounted: function() {
-    this.socketCreate()
-    this.socketDefault()
+  mounted: function () {
+    this.socketConnect()
   }
-  
+
 }
 </script>
-
 
 <style scoped>
 .top-bar {
