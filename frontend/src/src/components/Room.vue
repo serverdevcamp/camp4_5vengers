@@ -27,7 +27,7 @@
                     </v-flex>
                     <v-flex row wrap grid-list-md ml-1 p-0>
                         <v-avatar wrap p-0 m-0>
-                            <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain></v-img>
+                            <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain @click="this.$router.push('/roomDetails')"></v-img>
                         </v-avatar>
 
                         <v-flex>
