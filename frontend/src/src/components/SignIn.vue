@@ -43,13 +43,14 @@ export default {
 
 .back {
     width: 100%;
-    height: 100%;
+    height: 100vh;
     background-color: #F7E600;
 }
 
 .btn-login {
     width: 30%;
     padding: 0;
+    margin-left: 35%;
 }
 
 </style>

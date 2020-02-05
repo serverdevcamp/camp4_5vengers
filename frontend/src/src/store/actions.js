@@ -12,7 +12,7 @@ export const Actions = {
   },
   signIn ({ commit }, payload) {
     axios.post('http://localhost:3000/main/login', payload).then(response => {
-      if (payload.status === 200) commit('signInSuccess', response.data)
+      if (response.data.status === 200) commit('signInSuccess', response.data)
       else commit('signInFail', response.data)
     })
   }

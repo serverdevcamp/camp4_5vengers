@@ -6,7 +6,7 @@ export const Mutations = {
   },
   signInSuccess (state, payload) {
     state.token = payload.result[0].token
-    router.push('/todo')
+    router.push('/home')
   },
   signInFail (state, payload) {
     if (payload.status === 203) console.log('비밀번호 불일치')
