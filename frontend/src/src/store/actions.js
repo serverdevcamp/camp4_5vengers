@@ -1,19 +1,30 @@
 import axios from 'axios'
+import router from '../router'
 
 export const Actions = {
   signUp ({ commit }, payload) {
-    axios.post('http://localhost:3000/signup/', payload).then(response => {
-      if (response.status === 201) {
+    axios.post('http://localhost:3000/user/signUp', payload).then(response => {
+      console.log('here actions')
+      if (response.data.status === 201) {
         commit('signUpSuccess')
-        location.reload('/')
-        console.log('서버연결 중')
+        router.push('/home')
+      } else if (response.data.status === 330) {
+        commit('signUpFail')
+        location.href = '/signUp?result=330'
       }
     })
   },
   signIn ({ commit }, payload) {
-    axios.post('http://localhost:3000/main/login', payload).then(response => {
-      if (response.data.status === 200) commit('signInSuccess', response.data)
-      else commit('signInFail', response.data)
+    axios.post('http://localhost:3000/user/signIn', payload).then(response => {
+      if (response.data.status === 200) {
+        commit('signInSuccess', response.data)
+      } else if (response.data.status === 336) {
+        commit('signInFail')
+        location.href = '/signIn?result=336'
+      } else if (response.data.status === 331) {
+        commit('signInFail')
+        location.href = '/signIn?result=331'
+      }
     })
   },
   sendMsg ({ commit }, payload) {

@@ -29,9 +29,20 @@ export default {
         pwd: this.userPwd
       }
       this.$store.dispatch('signIn', object) // actions에 있는 메서드 호출
+    },
+    checkSignInResult () {
+      if (this.$route.query.result === '336') {
+        alert('존재하는 회원이 아닙니다.')
+        location.href = '/signIn'
+      } else if (this.$route.query.result === '331') {
+        alert('비밀번호가 일치하지 않습니다.')
+        location.href = '/signIn'
+      }
     }
   },
-  computed: {}
+  mounted: function () {
+    this.checkSignInResult()
+  }
 }
 </script>
 

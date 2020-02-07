@@ -10,12 +10,17 @@ Vue.use(Vuex)
 
 export const store = new Vuex.Store({
   state: {
-    user: null,
     userId: '',
-    userNick: '밍구킴',
+    userEmail: '',
     userPwd: '',
+    userName: '',
+    userNick: '',
     userToken: '',
-    userIntro: '예이예이예'
+    userIntro: '',
+    userProfileFront: '',
+    userProfileBack: '',
+
+    ALREADY_EXIST_USER: 0
   },
   mutations: Object.assign({}, Mutations),
   getters: Object.assign({}, Getters, userInfoGetters),

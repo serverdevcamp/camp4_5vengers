@@ -6,35 +6,35 @@
   <v-row justify = "center" align = "center">
     <v-layout row wrap align-center justify-center>
       <v-flex xs12 sm4 md4 lg3 class="box sample1">
-          <v-text-field v-model = "id" single-line solo background-color = #ffffff placeholder = "아이디"></v-text-field>
+          <v-text-field v-model = "userId" single-line solo placeholder="아이디" required></v-text-field>
       </v-flex>
     </v-layout>
   </v-row>
   <v-row justify = "center" align = "center">
     <v-layout row rap align-center justify-center>
       <v-flex xs12 sm4 md4 lg3 class="box sample1">
-          <v-text-field v-model = "name" solo background-color = #ffffff placeholder = "이름"></v-text-field>
+          <v-text-field v-model = "userName" solo placeholder="이름" required></v-text-field>
       </v-flex>
     </v-layout>
   </v-row>
   <v-row justify = "center" align = "center">
     <v-layout row wrap align-center justify-center>
       <v-flex xs12 sm4 md4 lg3 class="box sample1">
-          <v-text-field v-model = "email" solo background-color = #ffffff placeholder = "이메일"></v-text-field>
+          <v-text-field v-model = "userEmail" solo placeholder="이메일" required></v-text-field>
       </v-flex>
     </v-layout>
   </v-row>
   <v-row justify = "center" align = "center">
     <v-layout row wrap align-center justify-center>
       <v-flex xs12 sm4 md4 lg3 class="box sample1">
-          <v-text-field v-model = "pwd" solo background-color = #ffffff placeholder = "비밀번호" type = password></v-text-field>
+          <v-text-field v-model = "userPwd" solo placeholder="비밀번호" type = password required></v-text-field>
       </v-flex>
     </v-layout>
   </v-row>
   <v-row justify = "center" align = "center">
     <v-layout row wrap align-center justify-center>
       <v-flex xs12 sm4 md4 lg3 class="box sample1">
-          <v-text-field v-model = "nick" solo background-color = #ffffff placeholder = "닉네임"></v-text-field>
+          <v-text-field v-model = "userNick" solo placeholder="닉네임" required></v-text-field>
       </v-flex>
     </v-layout>
   </v-row>
@@ -54,26 +54,33 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      id: '',
-      name: '',
-      email: '',
-      pwd: '',
-      nick: ''
+      userId: '',
+      userName: '',
+      userEmail: '',
+      userPwd: '',
+      userNick: ''
     }
   },
   methods: {
-    onSignUp () {
+    onSignUp: function () {
       const object = {
-        id: this.id,
-        name: this.name,
-        email: this.email,
-        pwd: this.pwd,
-        nick: this.nick
+        id: this.userId,
+        name: this.userName,
+        email: this.userEmail,
+        pwd: this.userPwd,
+        nick: this.userNick
       }
-      console.log(object)
       this.$store.dispatch('signUp', object)
+    },
+    checkSignUpResult: function () {
+      if (this.$route.query.result) {
+        alert('중복된 회원입니다.')
+        location.href = '/signUp'
+      }
     }
-
+  },
+  mounted: function () {
+    this.checkSignUpResult()
   }
 }
 </script>
