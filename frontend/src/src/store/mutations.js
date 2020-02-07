@@ -10,10 +10,15 @@ export const Mutations = {
   signInSuccess (state, payload) {
     console.log('signInSuccess')
     state.token = payload.data[0].token
-    router.push('/home')
+
+    if (payload.data[0].status === 1) router.push('/home')
+    else router.push('/auth')
   },
   signInFail (state, payload) {
     console.log('signInFail')
+  },
+  authSuccess (state, payload) {
+    router.push('/home')
   },
   sendMsgSuccess (state, payload) {
     console.log(state)

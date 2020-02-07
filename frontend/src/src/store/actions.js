@@ -27,6 +27,19 @@ export const Actions = {
       }
     })
   },
+  auth ({ commit }, payload) {
+    axios.post('http://localhost:3000/user/auth', payload).then(response => {
+      if (response.data.status === 200) {
+        commit('authSuccess')
+      } else if (response.data.status === 336) {
+        commit('authFail')
+        location.href = '/auth?result=336'
+      } else if (response.data.status === 333) {
+        commit('authFail')
+        location.href = '/auth?result=333'
+      }
+    })
+  },
   sendMsg ({ commit }, payload) {
     console.log(payload)
     axios.post('http://localhost:3000/example', payload).then(response => {

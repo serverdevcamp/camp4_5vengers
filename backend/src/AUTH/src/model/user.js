@@ -55,7 +55,7 @@ module.exports = {
 
             if (selectUserResult.length != 0) {
                 resolve({
-                    code: statusCode.NOT_FOUND,
+                    code: 201,
                     json: util.successFalse(statusCode.USER_ALREADY_EXIST, "중복된 회원입니다.")
                 });
                 return;
@@ -91,7 +91,7 @@ module.exports = {
                 });
 
                 resolve({
-                    code: statusCode.CREATED,
+                    code: 201,
                     json: util.successTrue(statusCode.CREATED, "회원가입 완료")
                 });
 
@@ -113,7 +113,7 @@ module.exports = {
             let comparePwdQuery = `
             SELECT *
             FROM user
-            WHERE pwd = ? `;
+            WHERE pwd = ? and id = ? `;
 
             let selectUserResult = await db.queryParam_Arr(selectUserQuery, [id]);
             if (selectUserResult.length == 0) {
@@ -124,7 +124,7 @@ module.exports = {
                 return;
             } else {
                 pwd = _crypto.pbkdf2Sync(pwd, selectUserResult[0].salt, 420000, 32, 'sha512').toString('base64');
-                let comparePwdResult = await db.queryParam_Arr(comparePwdQuery, [pwd]);
+                let comparePwdResult = await db.queryParam_Arr(comparePwdQuery, [pwd, id]);
 
                 if (comparePwdResult.length == 0) {
                     resolve({
@@ -160,6 +160,7 @@ module.exports = {
                             let userInfo = {};
 
                             userInfo.token = token;
+                            userInfo.status = comparePwdResult[0].status
                             resultArray.push(userInfo);
 
                             resolve({

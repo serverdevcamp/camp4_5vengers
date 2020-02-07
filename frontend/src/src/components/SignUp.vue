@@ -73,7 +73,7 @@ export default {
       this.$store.dispatch('signUp', object)
     },
     checkSignUpResult: function () {
-      if (this.$route.query.result) {
+      if (this.$route.query.result === '330') {
         alert('중복된 회원입니다.')
         location.href = '/signUp'
       }

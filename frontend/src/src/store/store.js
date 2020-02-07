@@ -18,9 +18,7 @@ export const store = new Vuex.Store({
     userToken: '',
     userIntro: '',
     userProfileFront: '',
-    userProfileBack: '',
-
-    ALREADY_EXIST_USER: 0
+    userProfileBack: ''
   },
   mutations: Object.assign({}, Mutations),
   getters: Object.assign({}, Getters, userInfoGetters),
