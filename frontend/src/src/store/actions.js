@@ -40,6 +40,8 @@ export const Actions = {
       }
     })
   },
+  home ({ commit }, payload) {
+  },
   sendMsg ({ commit }, payload) {
     console.log(payload)
     axios.post('http://localhost:3000/example', payload).then(response => {

@@ -4,7 +4,11 @@ const db = require('../module/pool.js');
 const _crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-const config = require('../config/secretKey');
+const secretKey = require('../config/secretKey');
+
+const jwtVerify = require('../module/jwtVerify');
+const constants = require('../module/constants');
+
 const nodemailer = require('nodemailer');
 const _redis = require('redis');
 const secretEmail = require('../config/email');
@@ -22,10 +26,16 @@ let transporter = nodemailer.createTransport({
     }
 });
 
-// 토큰 설정
-let option = {
+// access token 설정
+let accessOption = {
     algorithm: "HS512",
     expiresIn: 3600 * 24 * 1 // 하루
+}
+
+// refresh token 설정
+let refreshOption = {
+    algorithm: "HS512",
+    expiresIn: 3600 * 24 * 14 // 2주
 }
 
 // 이메일 인증코드 10자
@@ -71,7 +81,7 @@ module.exports = {
                 INSERT INTO user
                 VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?);
                 `;
-                let insertUserResult = await db.queryParam_Parse(insertUserQuery, [null, name, id, email, pwd, nick, salt, now, now, null, 0, JSON.stringify(tempProfile), null, verifyCode]);
+                let insertUserResult = await db.queryParam_Parse(insertUserQuery, [null, name, id, email, pwd, nick, salt, now, now, null, 0, JSON.stringify(tempProfile), null, verifyCode, null]);
 
                 // 이메일 전송 옵션 설정
                 let mailOptions = {
@@ -115,6 +125,8 @@ module.exports = {
             FROM user
             WHERE pwd = ? and id = ? `;
 
+            let tempAccessToken, tempRefreshToken;
+
             let selectUserResult = await db.queryParam_Arr(selectUserQuery, [id]);
             if (selectUserResult.length == 0) {
                 resolve({
@@ -137,8 +149,8 @@ module.exports = {
                         id: id,
                         pwd: pwd
                     };
-                    // 로그인 할 때마다 토큰 발행
-                    jwt.sign(payload, config.key, option, (err, token) => {
+                    // access token 발행
+                    jwt.sign(payload, secretKey.access, accessOption, (err, accessToken) => {
                         if (err) {
                             resolve({
                                 code: 500,
@@ -146,33 +158,189 @@ module.exports = {
                             });
                             return;
                         } else {
-                            // redis에 유저 아이디-토큰 저장
-                            redisClient.set(id, token, function (err, data) {
+                            tempAccessToken = accessToken;
+
+                            // // redis에 유저 아이디-access token 저장
+                            // redisClient.set(id, accessToken, function (err, data) {
+                            //     if (err) {
+                            //         console.log(err);
+                            //         res.send("error " + err);
+                            //         return;
+                            //     } else {
+                            //         redisClient.expire(id, 60 * 60 * 24 * 1); // 1일 뒤 만료
+                            //     }
+                            // });
+
+                            // refresh token 발행
+                            jwt.sign(payload, secretKey.refresh, refreshOption, (err, refreshToken) => {
+                                if (err) {
+                                    resolve({
+                                        code: 500,
+                                        json: util.successFalse(statusCode.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR")
+                                    });
+                                    return;
+                                } else {
+                                    tempRefreshToken = refreshToken;
+                                }
+                            })
+                        }
+                    })
+                    let updateRefreshTokenQuery = `
+                    UPDATE user 
+                    SET refresh_token = ?
+                    WHERE id = ?`;
+
+                    let updateRefreshTokenResult = await db.queryParam_Parse(updateRefreshTokenQuery, [tempRefreshToken, id]);
+                    let resultArray = [];
+                    let userInfo = {};
+
+                    userInfo.accessToken = tempAccessToken;
+                    userInfo.refreshToken = tempRefreshToken;
+                    userInfo.status = comparePwdResult[0].status;
+                    resultArray.push(userInfo);
+
+                    resolve({
+                        code: 200,
+                        json: util.successTrue(statusCode.OK, "로그인 성공", resultArray)
+                    });
+
+                }
+
+            }
+
+        });
+    },
+
+    // access token 재발급
+    reAccessToken: ({ id, refreshToken }) => {
+        return new Promise(async (resolve, reject) => {
+            let selectUserQuery = `
+            SELECT *
+            FROM user
+            WHERE id = ? `;
+            let selectUserResult = await db.queryParam_Arr(selectUserQuery, [id]);
+
+            if (selectUserResult.length == 0) {
+                resolve({
+                    code: 201,
+                    json: util.successFalse(statusCode.USER_NOT_EXIST_USER, "존재하는 회원이 아닙니다.")
+                });
+                return;
+            } else {
+                let checkRightTokenQuery = `
+                SELECT *
+                FROM user
+                WHERE id = ? and refresh_token = ? `;
+                let checkRightTokenResult = await db.queryParam_Parse(checkRightTokenQuery, [id, refreshToken]);
+                if (checkRightTokenResult.length == 0) {
+                    resolve({
+                        code: 201,
+                        json: util.successFalse(statusCode.TOKEN_NOT_SAME, "토큰이 일치하지 않습니다.")
+                    });
+                    return;
+                } else {
+                    // access token 발행
+                    jwt.sign(payload, secretKey.access, accessOption, (err, accessToken) => {
+                        if (err) {
+                            resolve({
+                                code: 500,
+                                json: util.successFalse(statusCode.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR")
+                            });
+                            return;
+                        } else {
+
+                            // redis에 유저 아이디-access token 저장
+                            redisClient.set(id, accessToken, function (err, data) {
                                 if (err) {
                                     console.log(err);
                                     res.send("error " + err);
                                     return;
                                 } else {
-                                    redisClient.expire(id, 60 * 60 * 24 * 10); // 10일 뒤 만료
+                                    redisClient.expire(id, 60 * 60 * 24 * 1); // 1일 뒤 만료
                                 }
                             });
+
                             let resultArray = [];
                             let userInfo = {};
 
-                            userInfo.token = token;
-                            userInfo.status = comparePwdResult[0].status
+                            userInfo.accessToken = accessToken;
                             resultArray.push(userInfo);
 
                             resolve({
                                 code: 200,
-                                json: util.successTrue(statusCode.OK, "로그인 성공", resultArray)
+                                json: util.successTrue(statusCode.OK, "ACCESS 토큰 재발급 성공", resultArray)
                             });
+
+
                         }
                     })
                 }
-
             }
+        });
+    },
 
+    // refresh token 재발급
+    reRefreshToken: ({ id }) => {
+        return new Promise(async (resolve, reject) => {
+            let selectUserQuery = `
+            SELECT *
+            FROM user
+            WHERE id = ? `;
+            let selectUserResult = await db.queryParam_Arr(selectUserQuery, [id]);
+            let tempRefreshToken;
+
+            if (selectUserResult.length == 0) {
+                resolve({
+                    code: 201,
+                    json: util.successFalse(statusCode.USER_NOT_EXIST_USER, "존재하는 회원이 아닙니다.")
+                });
+                return;
+            } else {
+                let selectTokenQuery = `
+                SELECT refresh_token
+                FROM user
+                WHERE id = ?`;
+                let selectTokenResult = await db.queryParam_Parse(selectTokenQuery, [id]);
+                if (selectTokenResult.length != 0) {
+                    resolve({
+                        code: 201,
+                        json: util.successFalse(statusCode.TOKEN_ALREADY_EXIST, "REFRESH 토큰이 이미 존재합니다.")
+                    });
+                    return;
+                } else {
+                    // refresh token 발행
+                    jwt.sign(payload, secretKey.refresh, refreshOption, (err, refreshToken) => {
+                        if (err) {
+                            resolve({
+                                code: 500,
+                                json: util.successFalse(statusCode.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR")
+                            });
+                            return;
+                        } else {
+                            tempRefreshToken = refreshToken;
+                        }
+                    })
+
+                    let updateRefreshTokenQuery = `
+                    UPDATE user 
+                    SET refresh_token = ?
+                    WHERE id = ?`;
+
+                    let updateRefreshTokenResult = await db.queryParam_Parse(updateRefreshTokenQuery, [tempRefreshToken, id]);
+
+                    let resultArray = [];
+                    let userInfo = {};
+
+                    userInfo.refreshToken = tempRefreshToken;
+                    resultArray.push(userInfo);
+
+                    resolve({
+                        code: 200,
+                        json: util.successTrue(statusCode.OK, "REFRESH 토큰 재발급 성공", resultArray)
+                    });
+
+                }
+            }
         });
     },
 
@@ -195,7 +363,7 @@ module.exports = {
                     let updateStatusQuery = `
                     UPDATE user 
                     SET status = 1
-                    WHERE email = ?`;
+                    WHERE email = ? `;
 
                     let updateStatusResult = await db.queryParam_Parse(updateStatusQuery, [email]);
                     resolve({
@@ -211,5 +379,4 @@ module.exports = {
             }
         });
     }
-
 };

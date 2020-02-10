@@ -1,4 +1,5 @@
 import router from '../router'
+import VueCookies from 'vue-cookies'
 
 export const Mutations = {
   signUpSuccess (state, payload) {
@@ -9,7 +10,10 @@ export const Mutations = {
   },
   signInSuccess (state, payload) {
     console.log('signInSuccess')
-    state.token = payload.data[0].token
+    state.token = payload.data[0].accessToken
+
+    VueCookies.set('accessToken', payload.data[0].accessToken, '30s')
+    VueCookies.set('refreshToken', payload.data[0].refreshToken, -1)
 
     if (payload.data[0].status === 1) router.push('/home')
     else router.push('/auth')

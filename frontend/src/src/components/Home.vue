@@ -124,6 +124,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import VueCookies from 'vue-cookies'
 
 export default {
   data () {
@@ -134,12 +135,25 @@ export default {
     }
   },
   methods: {
+    checkTokenCookie () {
+      if (VueCookies.get('accessToken') != null) {
+        const object = {
+          accessToken: VueCookies.get('accessToken')
+        }
+        this.$store.dispatch('home', object)
+      } else {
+        location.href = '/signIn?result=SESSION_ERR'
+      }
+    }
   },
   computed: {
     ...mapGetters({
       userNick: 'nickInfo',
       userIntro: 'introInfo'
     })
+  },
+  created: function () {
+    this.checkTokenCookie()
   }
 }
 </script>

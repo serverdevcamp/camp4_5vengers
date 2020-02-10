@@ -10,7 +10,19 @@ import AuthRoutes from './auth'
 
 Vue.use(Router)
 
-export default new Router({
+// export default new Router({
+//   mode: 'history',
+//   routes: [
+//     SignInRoutes,
+//     SignUpRoutes,
+//     HomeRoutes,
+//     RoomRoutes,
+//     RoomDetailsRoutes,
+//     AuthRoutes
+//   ]
+// })
+
+const router = new Router({
   mode: 'history',
   routes: [
     SignInRoutes,
@@ -21,3 +33,16 @@ export default new Router({
     AuthRoutes
   ]
 })
+// router.beforeEach(async (to, from, next) => {
+//   if (VueCookies.get('token') === null && VueCookies.get('refresh_token') !== null) {
+//     await refreshToken()
+//   }
+
+// if (to.matched.some(record => record.meta.unauthorized) || VueCookies.get('token')) {
+//   return next()
+// }
+
+//   alert('로그인 해주세요')
+//   return next('/login')
+// })
+export default router
