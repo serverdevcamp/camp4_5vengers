@@ -13,10 +13,11 @@ module.exports = {
                 return constants.ACCESS_INV
               }
               else{
-                console.log(err.message);
+                console.log('ERR!!:: ',err.message);
               }
             }
             else{
+                console.log('result:: ',data);
                 return data
             }
           });
@@ -32,10 +33,11 @@ module.exports = {
                 return constants.REFRESH_INV
               }
               else{
-                console.log(err.message);
+                console.log('ERR!!:: ',err.message);
               }
             }
             else{
+                console.log('result:: ',data);
                 return data
             }
           });

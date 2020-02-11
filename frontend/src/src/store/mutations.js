@@ -13,7 +13,7 @@ export const Mutations = {
     state.token = payload.data[0].accessToken
 
     VueCookies.set('accessToken', payload.data[0].accessToken, '30s')
-    VueCookies.set('refreshToken', payload.data[0].refreshToken, -1)
+    VueCookies.set('refreshToken', payload.data[0].refreshToken, '60s')
 
     if (payload.data[0].status === 1) router.push('/home')
     else router.push('/auth')

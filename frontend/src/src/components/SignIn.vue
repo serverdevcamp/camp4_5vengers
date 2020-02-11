@@ -37,9 +37,6 @@ export default {
       } else if (this.$route.query.result === '331') {
         alert('비밀번호가 일치하지 않습니다.')
         location.href = '/signIn'
-      } else if (this.$route.query.result === 'SESSION_ERR') {
-        alert('세션이 만료되었습니다. 다시 로그인 해주세요.')
-        location.href = '/signIn'
       }
     }
   },

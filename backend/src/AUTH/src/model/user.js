@@ -4,11 +4,7 @@ const db = require('../module/pool.js');
 const _crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-const secretKey = require('../config/secretKey');
-
-const jwtVerify = require('../module/jwtVerify');
-const constants = require('../module/constants');
-
+const jwtCreate = require('../module/jwtCreate');
 const nodemailer = require('nodemailer');
 const _redis = require('redis');
 const secretEmail = require('../config/email');
@@ -26,18 +22,6 @@ let transporter = nodemailer.createTransport({
     }
 });
 
-// access token 설정
-let accessOption = {
-    algorithm: "HS512",
-    expiresIn: 3600 * 24 * 1 // 하루
-}
-
-// refresh token 설정
-let refreshOption = {
-    algorithm: "HS512",
-    expiresIn: 3600 * 24 * 14 // 2주
-}
-
 // 이메일 인증코드 10자
 function createKeyVerify() {
     var keyOne = _crypto.randomBytes(256).toString('hex').substr(100, 5);
@@ -45,7 +29,6 @@ function createKeyVerify() {
     var keyVerify = keyOne + keyTwo;
     return keyVerify;
 }
-
 
 module.exports = {
     // 회원가입
@@ -125,7 +108,7 @@ module.exports = {
             FROM user
             WHERE pwd = ? and id = ? `;
 
-            let tempAccessToken, tempRefreshToken;
+
 
             let selectUserResult = await db.queryParam_Arr(selectUserQuery, [id]);
             if (selectUserResult.length == 0) {
@@ -146,54 +129,21 @@ module.exports = {
                     return;
                 } else {
                     let payload = {
-                        id: id,
-                        pwd: pwd
+                        userIdx: comparePwdResult[0].idx,
+                        userId: id,
+                        userEmail: comparePwdResult[0].email
                     };
-                    // access token 발행
-                    jwt.sign(payload, secretKey.access, accessOption, (err, accessToken) => {
-                        if (err) {
-                            resolve({
-                                code: 500,
-                                json: util.successFalse(statusCode.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR")
-                            });
-                            return;
-                        } else {
-                            tempAccessToken = accessToken;
+                    let tempAccessToken = await jwtCreate.createAccessToken(payload);
+                    let tempRefreshToken = await jwtCreate.createRefreshToken(payload);
 
-                            // // redis에 유저 아이디-access token 저장
-                            // redisClient.set(id, accessToken, function (err, data) {
-                            //     if (err) {
-                            //         console.log(err);
-                            //         res.send("error " + err);
-                            //         return;
-                            //     } else {
-                            //         redisClient.expire(id, 60 * 60 * 24 * 1); // 1일 뒤 만료
-                            //     }
-                            // });
-
-                            // refresh token 발행
-                            jwt.sign(payload, secretKey.refresh, refreshOption, (err, refreshToken) => {
-                                if (err) {
-                                    resolve({
-                                        code: 500,
-                                        json: util.successFalse(statusCode.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR")
-                                    });
-                                    return;
-                                } else {
-                                    tempRefreshToken = refreshToken;
-                                }
-                            })
-                        }
-                    })
                     let updateRefreshTokenQuery = `
                     UPDATE user 
-                    SET refresh_token = ?
-                    WHERE id = ?`;
-
+                    SET refresh_token = ? 
+                    WHERE id = ? `;
                     let updateRefreshTokenResult = await db.queryParam_Parse(updateRefreshTokenQuery, [tempRefreshToken, id]);
+
                     let resultArray = [];
                     let userInfo = {};
-
                     userInfo.accessToken = tempAccessToken;
                     userInfo.refreshToken = tempRefreshToken;
                     userInfo.status = comparePwdResult[0].status;
@@ -211,14 +161,17 @@ module.exports = {
         });
     },
 
+
     // access token 재발급
-    reAccessToken: ({ id, refreshToken }) => {
+    reAccessToken: ({ refreshToken }) => {
         return new Promise(async (resolve, reject) => {
+            let decodeResult = jwt.decode(refreshToken);
+
             let selectUserQuery = `
             SELECT *
             FROM user
             WHERE id = ? `;
-            let selectUserResult = await db.queryParam_Arr(selectUserQuery, [id]);
+            let selectUserResult = await db.queryParam_Arr(selectUserQuery, [decodeResult.userId]);
 
             if (selectUserResult.length == 0) {
                 resolve({
@@ -231,7 +184,7 @@ module.exports = {
                 SELECT *
                 FROM user
                 WHERE id = ? and refresh_token = ? `;
-                let checkRightTokenResult = await db.queryParam_Parse(checkRightTokenQuery, [id, refreshToken]);
+                let checkRightTokenResult = await db.queryParam_Parse(checkRightTokenQuery, [decodeResult.userId, refreshToken]);
                 if (checkRightTokenResult.length == 0) {
                     resolve({
                         code: 201,
@@ -239,106 +192,22 @@ module.exports = {
                     });
                     return;
                 } else {
-                    // access token 발행
-                    jwt.sign(payload, secretKey.access, accessOption, (err, accessToken) => {
-                        if (err) {
-                            resolve({
-                                code: 500,
-                                json: util.successFalse(statusCode.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR")
-                            });
-                            return;
-                        } else {
-
-                            // redis에 유저 아이디-access token 저장
-                            redisClient.set(id, accessToken, function (err, data) {
-                                if (err) {
-                                    console.log(err);
-                                    res.send("error " + err);
-                                    return;
-                                } else {
-                                    redisClient.expire(id, 60 * 60 * 24 * 1); // 1일 뒤 만료
-                                }
-                            });
-
-                            let resultArray = [];
-                            let userInfo = {};
-
-                            userInfo.accessToken = accessToken;
-                            resultArray.push(userInfo);
-
-                            resolve({
-                                code: 200,
-                                json: util.successTrue(statusCode.OK, "ACCESS 토큰 재발급 성공", resultArray)
-                            });
-
-
-                        }
-                    })
-                }
-            }
-        });
-    },
-
-    // refresh token 재발급
-    reRefreshToken: ({ id }) => {
-        return new Promise(async (resolve, reject) => {
-            let selectUserQuery = `
-            SELECT *
-            FROM user
-            WHERE id = ? `;
-            let selectUserResult = await db.queryParam_Arr(selectUserQuery, [id]);
-            let tempRefreshToken;
-
-            if (selectUserResult.length == 0) {
-                resolve({
-                    code: 201,
-                    json: util.successFalse(statusCode.USER_NOT_EXIST_USER, "존재하는 회원이 아닙니다.")
-                });
-                return;
-            } else {
-                let selectTokenQuery = `
-                SELECT refresh_token
-                FROM user
-                WHERE id = ?`;
-                let selectTokenResult = await db.queryParam_Parse(selectTokenQuery, [id]);
-                if (selectTokenResult.length != 0) {
-                    resolve({
-                        code: 201,
-                        json: util.successFalse(statusCode.TOKEN_ALREADY_EXIST, "REFRESH 토큰이 이미 존재합니다.")
-                    });
-                    return;
-                } else {
-                    // refresh token 발행
-                    jwt.sign(payload, secretKey.refresh, refreshOption, (err, refreshToken) => {
-                        if (err) {
-                            resolve({
-                                code: 500,
-                                json: util.successFalse(statusCode.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR")
-                            });
-                            return;
-                        } else {
-                            tempRefreshToken = refreshToken;
-                        }
-                    })
-
-                    let updateRefreshTokenQuery = `
-                    UPDATE user 
-                    SET refresh_token = ?
-                    WHERE id = ?`;
-
-                    let updateRefreshTokenResult = await db.queryParam_Parse(updateRefreshTokenQuery, [tempRefreshToken, id]);
-
+                    let payload = {
+                        userIdx: checkRightTokenResult[0].idx,
+                        userId: checkRightTokenResult[0].id,
+                        userEmail: checkRightTokenResult[0].email
+                    };
+                    let tempAccessToken = await jwtCreate.createAccessToken(payload);
                     let resultArray = [];
                     let userInfo = {};
 
-                    userInfo.refreshToken = tempRefreshToken;
+                    userInfo.accessToken = tempAccessToken;
                     resultArray.push(userInfo);
 
                     resolve({
                         code: 200,
-                        json: util.successTrue(statusCode.OK, "REFRESH 토큰 재발급 성공", resultArray)
+                        json: util.successTrue(statusCode.OK, "ACCESS 토큰 재발급 성공", resultArray)
                     });
-
                 }
             }
         });

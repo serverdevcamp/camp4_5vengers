@@ -4,11 +4,11 @@ var router = express.Router();
 const signIn = require('./signIn');
 const signUp = require('./signUp');
 const auth = require('./auth');
-const home = require('./home');
+const reAccessToken = require('./reAccessToken');
 
 router.use('/signIn', signIn);
 router.use('/signUp', signUp);
 router.use('/auth', auth);
-router.use('/home', home);
+router.use('/reAccessToken', reAccessToken);
 
 module.exports = router;
