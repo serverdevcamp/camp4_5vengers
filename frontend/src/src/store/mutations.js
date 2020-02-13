@@ -33,5 +33,29 @@ export const Mutations = {
     console.log(state)
     console.log(payload)
     console.log('sendMsgFail!!')
+  },
+  changeRoomIdxSuccess (state, payload) {
+    console.log(payload)
+  },
+  changeRoomIdxFail (state, payload) {
+    console.log(payload)
+  },
+  changeOnlineSuccess (state, payload) {
+    console.log(payload)
+  },
+  changeOnlineFail (state, payload) {
+    console.log(payload)
+  },
+  getRoomInfoSuccess (state, payload) {
+    console.log(payload.data)
+    var data = payload.data
+    console.log('data 1:: ', data.roomName)
+    console.log('data 2:: ', data.memCount)
+
+    state.room_name = data.roomName
+    state.mem_count = data.memCount
+  },
+  getRoomInfoFail (state, payload) {
+    console.log(payload)
   }
 }

@@ -50,6 +50,28 @@ export const Actions = {
       if (response.status === 200) commit('sendMsgSuccess', response.data)
       else commit('sendMsgFail', response.data)
     })
+  },
+  changeRoomIdx ({ commit }, payload) {
+    console.log(payload)
+    axios.post('http://localhost:3000/room/offline', payload).then(response => {
+      console.log('in')
+      if (response.status === 200) commit('changeRoomIdxSuccess', response.data)
+      else commit('changeRoomIdxFail', response.data)
+    })
+  },
+  changeOnlineIdx ({ commit }, payload) {
+    console.log(payload)
+    axios.post('http://localhost:3000/room/online', payload).then(response => {
+      console.log('in_2')
+      if (response.status === 200) commit('changeOnlineSuccess', response.data)
+      else commit('changeOnlineFail', response.data)
+    })
+  },
+  getRoomInfo ({ commit }, payload) {
+    console.log(payload)
+    axios.post('http://localhost:3000/chat/default', payload).then(response => {
+      if (response.status === 200) commit('getRoomInfoSuccess', response.data)
+      else commit('getRoomInfoFail', response.data)
+    })
   }
-
 }
