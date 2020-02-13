@@ -1,5 +1,5 @@
 <template>
-    <v-layout column wrap>
+    <v-layout column wrap fixed>
         <!-- 맨 위에 채팅방 이름이랑 인원수 적혀 있는 곳 -->
         <v-flex md1 class="top-bar" fixed>
             <v-flex row wrap grid-list-md ml-1 p-3>
@@ -8,11 +8,11 @@
                     </v-avatar>
 
                     <v-flex>
-                        <v-flex wrap v-model="room_name" class="chat-name" v-bind:value="room_name" text-md-center mx-1 pb-1 md1>패밀리</v-flex>
+                        <v-flex wrap v-model="room_name" class="chat-name" v-bind:value="room_name" text-md-center mx-1 pb-1 md1>{{ room }}</v-flex>
                         <v-flex row grid-list-md ml-3 p-0>
                             <!-- <v-flex class="icon-num" text-md-left md1 pb-0> -->
                                 <img src="../assets/user.png" class="icon-user"/>
-                                <div class="chat-mem-num">4</div>
+                                <v-flex v-model="count" class="chat-mem-num">{{ count }}</v-flex>
                             <!-- </v-flex> -->
                             <!-- <v-flex class="chat-mem-num" text-md-left pb-0>4</v-flex> -->
                         </v-flex>
@@ -26,15 +26,23 @@
                 </v-flex>
         </v-flex>
 
-        <!-- 여기부터 채팅치는 구간 -->
-        <v-flex md9 class="middle-bar" fixed>
-            <div class="row messages-body">
+        <!-- 여기부터 채팅치는 구간-->
+        <v-flex md9 class="middle-bar">
+            <div class="row messages-body" v-cloak>
                 <div class="col-sm-12">
-                    <ul class="list-group message-group">
-                        <li v-for="(message, index) in messages" :key="index" track-by="$index">
-                            <img v-bind:src="message.front_img" class="rounded-circle float-left mr-2"> {{ message.message }}
-                            <!-- <hr> -->
-                            <small class="text-muted">{{ message.username }} @ {{ formatMessageDate(message.date) }}</small>
+                    <ul class="list-group" v-for="(message, index) in messages" :key="index" track-by="$index">
+                        <!--타인-->
+                        <li class="message-item" v-if="message.user_idx !== 8">
+                            <img v-bind:src="message.front_img" class="rounded-circle float-middle mr-1 message-group"> {{ message.message }}
+                            <small class="text-muted">{{ message.nick }} @ {{ formatMessageDate(message.regist_dt) }} {{ message.read_count }}</small>
+                            <!--읽은 메세지 수-->
+                            <!--online_dt > offline_dt 이면 지금 접속 중이라는 것 -->
+                        </li>
+                        <!-- 자신-->
+                        <li class="message-item-me" v-if="message.user_idx === 8">
+                            <!--읽은 메세지 수-->
+                            <small class="text-muted">{{ message.read_count }} {{ "나" }} @ {{ formatMessageDate(message.regist_dt) }}</small>
+                            {{ message.message }} <img v-bind:src="message.front_img" class="rounded-circle float-middle mr-2 message-group">
                         </li>
                     </ul>
                 </div>
@@ -65,7 +73,7 @@
         </v-flex>
 
         <!-- 설정 클릭 -->
-        <form @submit.prevent="settingsMethod">
+        <form @submit.prevent="settingsMethod" fixed>
             <v-dialog @close.prevent="settingsMethod" v-model="settingsClicked" max-width="380">
                 <v-card class="settingsCard">
                     <v-flex wrap column grid-list-md align-center lt-sign>
@@ -85,22 +93,33 @@
 import io from 'socket.io-client'
 import moment from 'moment'
 import Vue from 'vue'
+import { mapGetters } from 'vuex'
 
 export default {
   data () {
     return {
       settingsClicked: false,
-      room_name: '패밀리',
+      room_name: '',
+      mem_count: '',
       message: '',
-      messages: [],
+      messages: [], // 내가 아닌 타인이 보낸 메세지
       members: {},
-      socket: null
+      socket: null,
+      redis_idx: ''
     }
   },
   methods: {
     send: function () {
-      if (this.message !== '\n') this.socket.emit('send', this.message)
-      this.message = ''
+      if (this.message !== '\n') {
+        var info = ({
+          message: this.message,
+          userIdx: 8, // 일단 임시로 userIdx 3인 유저로 test
+          room_idx: 0,
+          mem_count: this.count// 채팅방의 인원수를 가져오기
+        })
+        this.socket.emit('send', info)
+        this.message = ''
+      }
     },
     formatMemberDate: function (date) {
       return moment(date).format('h:mm:ss a')
@@ -110,10 +129,14 @@ export default {
     },
     socketConnect () {
       // 소켓 연결
-      this.socket = io.connect('http://localhost:3000', { transports: ['websocket'] })
-
+      //   var room = ({
+      //     room_idx: 0
+      //   })
+      //   this.socket.emit('room', room)
       this.socket.on('messages', function (message) {
+        // console.log(message)
         this.messages.push(message)
+        // console.log(this.messages.length - 1)
       }.bind(this))
 
       this.socket.on('member_add', function (member) {
@@ -125,7 +148,15 @@ export default {
       }.bind(this))
 
       this.socket.on('message_history', function (messages) {
-        this.messages = messages
+        console.log(messages)
+        var temp = []
+        var i = 0
+        for (i = 0; i < messages.length; i++) {
+          if (messages[i].room_idx === 0) { // 같은 방 번호이고
+            temp.push(messages[i])
+          }
+        }
+        this.messages = temp
       }.bind(this))
 
       this.socket.on('member_history', function (members) {
@@ -134,7 +165,33 @@ export default {
     }
   },
   mounted: function () {
+    this.socket = io.connect('http://localhost:3000', { transports: ['websocket'], query: 'roomIdx=0' })// 여기에 room_idx를 전달해주기
+    // 일단 들어오면, db online_dt update 하기 && 읽은 메세지 수 update하기(만약 이 유저가 이미 읽은 메세지가 있으면 그대로 두고 안 읽은 메세지가 있으면 읽은 메세지 수 감소)
+    // 채팅방 이름, 채팅방 인원수 불러오기
+    this.$store.room_idx = 0
+    // 들어올 때마다 last이후의 메세지들의 reader에 자기 자신 idx추가하고 regist_count-- 하기!
+    var info = ({
+      userIdx: 8, // 일단 임시로 userIdx 8인 유저로 test
+      roomIdx: this.$stroe.room_idx
+    })
+    this.socket.emit('read', info)
+    const object = {
+      roomIdx: this.$store.room_idx,
+      userIdx: 8
+    }
+    this.$store.dispatch('changeOnlineIdx', object)
+    var roomInfo = ({
+      room_idx: this.$store.room_idx
+    })
+    this.$store.dispatch('getRoomInfo', roomInfo)
     this.socketConnect()
+  },
+
+  computed: {
+    ...mapGetters({
+      room: 'roomName',
+      count: 'memCount'
+    })
   }
 
 }
@@ -276,13 +333,17 @@ export default {
     padding-bottom: .25rem;
 }
 
-.meessage-avatar {
+.message-avatar {
     float: left;
     margin: 0px 15px 15px 0px;
 }
 
 .members-group {
     width: 100%;
+}
+
+.message-group {
+    width: 5vh;
 }
 
 .messages-header {
@@ -295,6 +356,13 @@ export default {
 
 .messages-main {
     height: 90vh;
+}
+
+.messages-body-me {
+    padding-top: 1rem;
+    overflow: auto;
+    height: 75vh;
+    padding-left: 70%;
 }
 
 .messages-body {
@@ -313,12 +381,25 @@ export default {
     border: none;
     border-top: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
-
+    width : 100%;
+    height: 10vh;
 }
 .list-group-item:first-child {
     border-top: none;
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
+    width : 100%;
+    height: 10%;
+}
+
+.message-item {
+    /* margin-left:0%; */
+    text-align: left;
+}
+
+.message-item-me {
+    padding-left: 70%;
+    text-align: right;
 }
 
 ul{

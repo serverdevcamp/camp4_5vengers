@@ -63,7 +63,14 @@ export default {
       this.$router.push('/roomDetails')
     }
   },
-  computed: {}
+  computed: {},
+  mounted: function () {
+    const object = {
+      roomIdx: this.$store.room_idx,
+      userIdx: 8
+    }
+    this.$store.dispatch('changeRoomIdx', object)
+  }
 }
 </script>
 <style scoped>
