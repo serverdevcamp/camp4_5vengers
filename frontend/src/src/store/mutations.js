@@ -12,8 +12,8 @@ export const Mutations = {
     console.log('signInSuccess')
     state.token = payload.data[0].accessToken
 
-    VueCookies.set('accessToken', payload.data[0].accessToken, '30s')
-    VueCookies.set('refreshToken', payload.data[0].refreshToken, '60s')
+    VueCookies.set('accessToken', payload.data[0].accessToken, '1d')
+    VueCookies.set('refreshToken', payload.data[0].refreshToken, '2d')
 
     if (payload.data[0].status === 1) router.push('/home')
     else router.push('/auth')
