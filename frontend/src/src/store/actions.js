@@ -75,7 +75,7 @@ export const Actions = {
     })
   },
   getRoomList ({ commit }, payload) {
-    axios.post('http://localhost:3001/room/main', payload).then(response => {
+    axios.post('http://localhost:3003/room/main', payload).then(response => {
       console.log('here actions', response.data.data)
       commit('getRoomListSuccess', response.data.data)
     })
