@@ -82,6 +82,13 @@ export default {
       inRoomDetails: 'inRoomDetails'
     })
   },
+  created: function () {
+    console.log('token check:: ', this.userToken)
+    const object = {
+      accessToken: this.userToken
+    }
+    this.$store.dispatch('getRoomList', object)
+  },
   mounted: function () {
     console.log('inRoomDetails : ', this.inRoomDetails)
     const object = {
@@ -89,7 +96,7 @@ export default {
       userIdx: 8,
       inRoomDetails: this.inRoomDetails // mapGetters에서 가져오기
     }
-    this.$store.dispatch('getRoomList', object)
+    this.$store.dispatch('changeRoomIdx', object)
   }
 }
 </script>
