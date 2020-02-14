@@ -78,7 +78,8 @@ export default {
     ...mapGetters({
       userToken: 'tokenInfo',
       roomList: 'roomList',
-      userIdx: 'idxInfo'
+      userIdx: 'idxInfo',
+      inRoomDetails: 'inRoomDetails'
     })
   },
   mounted: function () {
