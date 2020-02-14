@@ -29,13 +29,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 /*
   Redis
 */
-var redis = require('redis');
+// var redis = require('redis');
 
-client = redis.createClient(6379, '127.0.0.1');
-app.use(function (req, res, next) {
-  req.cache = client;
-  next();
-})
+// client = redis.createClient(6379, '127.0.0.1');
+// app.use(function (req, res, next) {
+//   req.cache = client;
+//   next();
+// })
 
 
 

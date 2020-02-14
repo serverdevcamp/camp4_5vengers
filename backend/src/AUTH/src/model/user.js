@@ -6,12 +6,12 @@ const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const jwtCreate = require('../module/jwtCreate');
 const nodemailer = require('nodemailer');
-const _redis = require('redis');
+// const _redis = require('redis');
 const secretEmail = require('../config/email');
-const redisClient = _redis.createClient({
-    host: "127.0.0.1",
-    port: 6379 // redis 기본 포트번호
-});
+// const redisClient = _redis.createClient({
+//     host: "127.0.0.1",
+//     port: 6379 // redis 기본 포트번호
+// });
 
 // nodemailer 설정
 let transporter = nodemailer.createTransport({
