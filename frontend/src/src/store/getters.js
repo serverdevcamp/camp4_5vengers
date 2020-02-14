@@ -12,6 +12,9 @@ export const userInfoGetters = {
 
   introInfo (state, getters) {
     return state.userIntro
+  },
+  idxInfo (state, getters) {
+    return state.userIdx
   }
 }
 
@@ -22,5 +25,11 @@ export const roomInfoGetters = {
 
   memCount (state, getters) {
     return state.mem_count
+  }
+}
+
+export const roomListGetters = {
+  roomList (state, getters) {
+    return state.roomList
   }
 }

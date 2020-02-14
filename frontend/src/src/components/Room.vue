@@ -20,27 +20,31 @@
                 <!-- 채팅방 목록 -->
                 <!-- <router-link to="/roomDetails"> -->
                 <router-link to="/roomDetails">
-                    <v-flex column grid-list-md>
+                    <v-flex v-for="(room, index) in this.roomList" :key="index" column grid-list-md v-on:click="goDetails(index)">
                         <!-- 2번 v-flex해서 공간 만들어주기 -->
-                        <v-flex wrap text-md-left>
-                        </v-flex>
-                        <v-flex wrap text-md-left>
-                        </v-flex>
-                        <v-flex row wrap grid-list-md ml-1 p-0>
-                            <v-avatar wrap p-0 m-0>
-                                <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain></v-img>
+                        <!-- <v-flex wrap text-md-left>
+                        </v-flex> -->
+                        <!-- <v-flex wrap text-md-left>
+                        </v-flex> -->
+                        <v-flex row wrap grid-list-md ml-1 p-0 m-0>
+                            <v-avatar  v-if="room.mem_profile.length === 1" contain p-0 m-0 wrap>
+                                    <v-img :src="(room.mem_profile[index])" class="img-user" contain></v-img>
+                            </v-avatar>
+
+                            <v-avatar  v-else contain p-0 m-0 wrap>
+                                    <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain></v-img>
                             </v-avatar>
 
                             <v-flex>
                                 <v-flex row grid-list-md ml-1 p-0>
-                                    <v-flex wrap class="text-nick" text-md-left pb-0 md1>패밀리</v-flex>
-                                    <v-flex wrap class="text-mem-num" text-md-left pb-0>4</v-flex>
+                                    <v-flex wrap class="text-nick" text-md-left fill-width p-0>{{ room.room_name }}</v-flex>
+                                    <v-flex wrap class="text-mem-num" text-md-left p-0>{{ room.mem_count }}</v-flex>
                                 </v-flex>
-                                <v-flex class="text-chat" text-md-left pt-0>안녕</v-flex>
+                                <v-flex class="text-chat" text-md-left pt-0>{{ room.recent_msg }}</v-flex>
                             </v-flex>
                             <v-flex>
-                                <v-flex class="text-time" text-md-right pb-0>오후 7:07</v-flex>
-                                <v-flex class="text-chat-num" text-md-right pt-0>60</v-flex>
+                                <v-flex class="text-time" text-md-right pb-0>{{ room.recent_msg_time }}</v-flex>
+                                <v-flex v-if="room.not_read_messages !== 0" class="text-chat-num" text-md-right pt-0>{{ room.not_read_messages }}</v-flex>
                             </v-flex>
                         </v-flex>
                     </v-flex>
@@ -52,6 +56,8 @@
     </v-container>
 </template>
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   data () {
     return {
@@ -59,17 +65,35 @@ export default {
     }
   },
   methods: {
-    goDetails () {
+    goDetails (index) {
+      const object = {
+        roomIdx: this.roomList[index].room_idx,
+        userIdx: this.userIdx
+      }
+      this.$store.dispatch('goRoomDetails', object)
       this.$router.push('/roomDetails')
     }
   },
-  computed: {},
+  computed: {
+    ...mapGetters({
+      userToken: 'tokenInfo',
+      roomList: 'roomList',
+      userIdx: 'idxInfo'
+    })
+  },
   mounted: function () {
+    // const object = {
+    //   roomIdx: this.$store.room_idx,
+    //   userIdx: 8
+    // }
+    // this.$store.dispatch('changeRoomIdx', object)
+  },
+  created: function () {
+    console.log('token check:: ', this.userToken)
     const object = {
-      roomIdx: this.$store.room_idx,
-      userIdx: 8
+      accessToken: this.userToken
     }
-    this.$store.dispatch('changeRoomIdx', object)
+    this.$store.dispatch('getRoomList', object)
   }
 }
 </script>
@@ -131,5 +155,8 @@ export default {
 .chat {
     font-size: 1em;
     font-weight : bold;
+}
+.img-user {
+
 }
 </style>

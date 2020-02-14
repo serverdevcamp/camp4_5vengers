@@ -73,5 +73,14 @@ export const Actions = {
       if (response.status === 200) commit('getRoomInfoSuccess', response.data)
       else commit('getRoomInfoFail', response.data)
     })
+  },
+  getRoomList ({ commit }, payload) {
+    axios.post('http://localhost:3001/room/main', payload).then(response => {
+      console.log('here actions', response.data.data)
+      commit('getRoomListSuccess', response.data.data)
+    })
+  },
+  goRoomDetails ({ commit }, payload) {
+    commit('goRoomDetails', payload)
   }
 }
