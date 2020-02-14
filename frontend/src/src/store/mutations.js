@@ -35,6 +35,7 @@ export const Mutations = {
     console.log('sendMsgFail!!')
   },
   changeRoomIdxSuccess (state, payload) {
+    state.inRoomDetails = 0
     console.log(payload)
   },
   changeRoomIdxFail (state, payload) {
@@ -57,5 +58,15 @@ export const Mutations = {
   },
   getRoomInfoFail (state, payload) {
     console.log(payload)
+  },
+  readCountSuccess (state, payload) {
+    console.log('readCoount: ', payload)
+    // var data = payload.data
+  },
+  readCountFail (state, payload) {
+    console.log(payload)
+  },
+  inRoomDetailsSuccess (state, payload) {
+    state.inRoomDetails = 1
   }
 }

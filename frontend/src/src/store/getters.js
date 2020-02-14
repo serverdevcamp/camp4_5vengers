@@ -24,3 +24,9 @@ export const roomInfoGetters = {
     return state.mem_count
   }
 }
+
+export const inRoomDetailsGetters = {
+  inRoomDetails (state, getters) {
+    return state.inRoomDetails
+  }
+}

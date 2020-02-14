@@ -52,6 +52,8 @@
     </v-container>
 </template>
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   data () {
     return {
@@ -63,11 +65,18 @@ export default {
       this.$router.push('/roomDetails')
     }
   },
-  computed: {},
+  computed: {
+    ...mapGetters({
+      inRoomDetails: 'inRoomDetails'
+      // mapGetters정의하고 그 inRoomDetails값을 가져와서 dispatch해주기
+    })
+  },
   mounted: function () {
+    console.log('inRoomDetails : ', this.inRoomDetails)
     const object = {
       roomIdx: this.$store.room_idx,
-      userIdx: 8
+      userIdx: 8,
+      inRoomDetails: this.inRoomDetails // mapGetters에서 가져오기
     }
     this.$store.dispatch('changeRoomIdx', object)
   }

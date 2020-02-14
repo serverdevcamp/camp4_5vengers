@@ -6,7 +6,7 @@ export async function refreshToken () {
     const payload = {
       refreshToken: VueCookies.get('refreshToken')
     }
-    const token = await axios.post('http://localhost:3000/user/reAccessToken', payload)
+    const token = await axios.post('13.125.153.37:3000/user/reAccessToken', payload)
     VueCookies.set('accessToken', token.data.data[0].accessToken, '60s')
     console.log('RE TOKEN:: ', token)
     return token
