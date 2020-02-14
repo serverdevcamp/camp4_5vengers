@@ -3,7 +3,7 @@ import router from '../router'
 
 export const Actions = {
   signUp ({ commit }, payload) {
-    axios.post('http://localhost:3000/user/signUp', payload).then(response => {
+    axios.post('http://13.125.153.37:3000/user/signUp', payload).then(response => {
       console.log('here actions')
       if (response.data.status === 201) {
         commit('signUpSuccess')
@@ -15,7 +15,7 @@ export const Actions = {
     })
   },
   signIn ({ commit }, payload) {
-    axios.post('http://localhost:3000/user/signIn', payload).then(response => {
+    axios.post('http://13.125.153.37:3000/user/signIn', payload).then(response => {
       if (response.data.status === 200) {
         commit('signInSuccess', response.data)
       } else if (response.data.status === 336) {
@@ -28,7 +28,7 @@ export const Actions = {
     })
   },
   auth ({ commit }, payload) {
-    axios.post('http://localhost:3000/user/auth', payload).then(response => {
+    axios.post('http://13.125.153.37:3000/user/auth', payload).then(response => {
       if (response.data.status === 200) {
         commit('authSuccess')
       } else if (response.data.status === 336) {
@@ -44,7 +44,7 @@ export const Actions = {
   },
   sendMsg ({ commit }, payload) {
     console.log(payload)
-    axios.post('http://localhost:3000/example', payload).then(response => {
+    axios.post('http://localhost:3001/example', payload).then(response => {
       console.log('in')
       console.log(response.status)
       if (response.status === 200) commit('sendMsgSuccess', response.data)
@@ -53,7 +53,7 @@ export const Actions = {
   },
   changeRoomIdx ({ commit }, payload) {
     console.log(payload)
-    axios.post('http://localhost:3000/room/offline', payload).then(response => {
+    axios.post('http://localhost:3001/room/offline', payload).then(response => {
       console.log('in')
       if (response.status === 200) commit('changeRoomIdxSuccess', response.data)
       else commit('changeRoomIdxFail', response.data)
@@ -61,7 +61,7 @@ export const Actions = {
   },
   changeOnlineIdx ({ commit }, payload) {
     console.log(payload)
-    axios.post('http://localhost:3000/room/online', payload).then(response => {
+    axios.post('http://localhost:3001/room/online', payload).then(response => {
       console.log('in_2')
       if (response.status === 200) commit('changeOnlineSuccess', response.data)
       else commit('changeOnlineFail', response.data)
@@ -69,7 +69,7 @@ export const Actions = {
   },
   getRoomInfo ({ commit }, payload) {
     console.log(payload)
-    axios.post('http://localhost:3000/chat/default', payload).then(response => {
+    axios.post('http://localhost:3001/chat/default', payload).then(response => {
       if (response.status === 200) commit('getRoomInfoSuccess', response.data)
       else commit('getRoomInfoFail', response.data)
     })
@@ -82,5 +82,8 @@ export const Actions = {
   },
   goRoomDetails ({ commit }, payload) {
     commit('goRoomDetails', payload)
+  },
+  inRoomDetails ({ commit }, payload) {
+    commit('inRoomDetailsSuccess')
   }
 }

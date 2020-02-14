@@ -82,16 +82,11 @@ export default {
     })
   },
   mounted: function () {
-    // const object = {
-    //   roomIdx: this.$store.room_idx,
-    //   userIdx: 8
-    // }
-    // this.$store.dispatch('changeRoomIdx', object)
-  },
-  created: function () {
-    console.log('token check:: ', this.userToken)
+    console.log('inRoomDetails : ', this.inRoomDetails)
     const object = {
-      accessToken: this.userToken
+      roomIdx: this.$store.room_idx,
+      userIdx: 8,
+      inRoomDetails: this.inRoomDetails // mapGetters에서 가져오기
     }
     this.$store.dispatch('getRoomList', object)
   }

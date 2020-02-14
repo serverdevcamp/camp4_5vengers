@@ -33,3 +33,9 @@ export const roomListGetters = {
     return state.roomList
   }
 }
+
+export const inRoomDetailsGetters = {
+  inRoomDetails (state, getters) {
+    return state.inRoomDetails
+  }
+}

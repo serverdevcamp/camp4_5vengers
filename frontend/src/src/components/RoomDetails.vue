@@ -30,18 +30,18 @@
         <v-flex md9 class="middle-bar">
             <div class="row messages-body" v-cloak>
                 <div class="col-sm-12">
-                    <ul class="list-group" v-for="(message, index) in messages" :key="index" track-by="$index">
+                    <ul class="list-group" v-bind:value="readCount"  v-for="(message, index) in messages" :key="index" track-by="$index">
                         <!--타인-->
-                        <li class="message-item" v-if="message.user_idx !== 8">
+                        <li class="message-item" v-bind:value="readCount_idx" v-if="message.user_idx !== 8 && message.room_idx === 0" >
                             <img v-bind:src="message.front_img" class="rounded-circle float-middle mr-1 message-group"> {{ message.message }}
-                            <small class="text-muted">{{ message.nick }} @ {{ formatMessageDate(message.regist_dt) }} {{ message.read_count }}</small>
+                            <small class="text-muted">{{ message.nick }} @ {{ formatMessageDate(message.regist_dt) }} {{ readCount[index] }}</small>
                             <!--읽은 메세지 수-->
                             <!--online_dt > offline_dt 이면 지금 접속 중이라는 것 -->
                         </li>
                         <!-- 자신-->
-                        <li class="message-item-me" v-if="message.user_idx === 8">
+                        <li class="message-item-me" v-bind:value="readCount_idx" v-if="message.user_idx === 8 && message.room_idx === 0">
                             <!--읽은 메세지 수-->
-                            <small class="text-muted">{{ message.read_count }} {{ "나" }} @ {{ formatMessageDate(message.regist_dt) }}</small>
+                            <small class="text-muted">{{ readCount[index] }} {{ "나" }} @ {{ formatMessageDate(message.regist_dt) }}</small>
                             {{ message.message }} <img v-bind:src="message.front_img" class="rounded-circle float-middle mr-2 message-group">
                         </li>
                     </ul>
@@ -105,7 +105,9 @@ export default {
       messages: [], // 내가 아닌 타인이 보낸 메세지
       members: {},
       socket: null,
-      redis_idx: ''
+      redis_idx: '',
+      readCount: [],
+      readCount_idx: -1
     }
   },
   methods: {
@@ -162,18 +164,32 @@ export default {
       this.socket.on('member_history', function (members) {
         this.members = members
       }.bind(this))
+
+      var temp = []
+      this.socket.on('readCount', function (readCount) {
+        console.log(readCount)
+        var i = 0
+        for (i = 0; i < readCount.length; i++) {
+          temp.push(readCount[i])
+        }
+      })
+      //   this.$store.readCount = temp
+      this.readCount = temp
     }
   },
   mounted: function () {
-    this.socket = io.connect('http://localhost:3000', { transports: ['websocket'], query: 'roomIdx=0' })// 여기에 room_idx를 전달해주기
+    this.socket = io.connect('http://localhost:3002', { transports: ['websocket'], query: 'roomIdx=0' })// 여기에 room_idx를 전달해주기
     // 일단 들어오면, db online_dt update 하기 && 읽은 메세지 수 update하기(만약 이 유저가 이미 읽은 메세지가 있으면 그대로 두고 안 읽은 메세지가 있으면 읽은 메세지 수 감소)
     // 채팅방 이름, 채팅방 인원수 불러오기
     this.$store.room_idx = 0
+    this.readCount_idx = -1
+    this.$store.dispatch('inRoomDetails')
     // 들어올 때마다 last이후의 메세지들의 reader에 자기 자신 idx추가하고 regist_count-- 하기!
     var info = ({
       userIdx: 8, // 일단 임시로 userIdx 8인 유저로 test
-      roomIdx: this.$stroe.room_idx
+      roomIdx: this.$store.room_idx
     })
+    // this.$store.dispatch('readCount', info)
     this.socket.emit('read', info)
     const object = {
       roomIdx: this.$store.room_idx,
@@ -191,6 +207,8 @@ export default {
     ...mapGetters({
       room: 'roomName',
       count: 'memCount'
+    //   inRoomDetails: 'inRoomDetails'
+    //   readCount: 'readCount'
     })
   }
 

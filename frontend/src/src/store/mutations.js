@@ -36,6 +36,7 @@ export const Mutations = {
     console.log('sendMsgFail!!')
   },
   changeRoomIdxSuccess (state, payload) {
+    state.inRoomDetails = 0
     console.log(payload)
   },
   changeRoomIdxFail (state, payload) {
@@ -66,5 +67,15 @@ export const Mutations = {
     state.room_idx = payload.roomIdx
     console.log('STORE ROOM IDX:: ', state.room_idx)
     console.log('STORE USER IDX:: ', state.userIdx)
+  },
+  readCountSuccess (state, payload) {
+    console.log('readCoount: ', payload)
+    // var data = payload.data
+  },
+  readCountFail (state, payload) {
+    console.log(payload)
+  },
+  inRoomDetailsSuccess (state, payload) {
+    state.inRoomDetails = 1
   }
 }
