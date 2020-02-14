@@ -10,7 +10,8 @@ export const Mutations = {
   },
   signInSuccess (state, payload) {
     console.log('signInSuccess')
-    state.token = payload.data[0].accessToken
+    state.userIdx = payload.data[0].userIdx
+    state.userToken = payload.data[0].accessToken
 
     VueCookies.set('accessToken', payload.data[0].accessToken, '1d')
     VueCookies.set('refreshToken', payload.data[0].refreshToken, '2d')
@@ -58,6 +59,14 @@ export const Mutations = {
   },
   getRoomInfoFail (state, payload) {
     console.log(payload)
+  },
+  getRoomListSuccess (state, payload) {
+    state.roomList = payload
+  },
+  goRoomDetails (state, payload) {
+    state.room_idx = payload.roomIdx
+    console.log('STORE ROOM IDX:: ', state.room_idx)
+    console.log('STORE USER IDX:: ', state.userIdx)
   },
   readCountSuccess (state, payload) {
     console.log('readCoount: ', payload)

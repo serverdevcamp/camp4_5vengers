@@ -74,13 +74,15 @@ export const Actions = {
       else commit('getRoomInfoFail', response.data)
     })
   },
-  // readCount ({ commit }, payload) {
-  //   console.log(payload)
-  //   axios.post('http://localhost:3001/room/readCount', payload).then(response => {
-  //     if (response.status === 200) commit('readCountSuccess', response.data)
-  //     else commit('readCountFail', response.data)
-  //   })
-  // }
+  getRoomList ({ commit }, payload) {
+    axios.post('http://localhost:3001/room/main', payload).then(response => {
+      console.log('here actions', response.data.data)
+      commit('getRoomListSuccess', response.data.data)
+    })
+  },
+  goRoomDetails ({ commit }, payload) {
+    commit('goRoomDetails', payload)
+  },
   inRoomDetails ({ commit }, payload) {
     commit('inRoomDetailsSuccess')
   }

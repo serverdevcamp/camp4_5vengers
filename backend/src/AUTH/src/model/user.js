@@ -144,6 +144,7 @@ module.exports = {
 
                     let resultArray = [];
                     let userInfo = {};
+                    userInfo.userIdx = comparePwdResult[0].idx;
                     userInfo.accessToken = tempAccessToken;
                     userInfo.refreshToken = tempRefreshToken;
                     userInfo.status = comparePwdResult[0].status;
