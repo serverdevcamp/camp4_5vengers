@@ -39,3 +39,9 @@ export const inRoomDetailsGetters = {
     return state.inRoomDetails
   }
 }
+
+export const friendListGetters = {
+  friendList (state, getters) {
+    return state.friendList
+  }
+}

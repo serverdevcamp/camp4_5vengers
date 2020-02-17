@@ -62,6 +62,7 @@ export const Mutations = {
   },
   getRoomListSuccess (state, payload) {
     state.roomList = payload
+    console.log('here get room list mutations')
   },
   goRoomDetails (state, payload) {
     state.room_idx = payload.roomIdx
@@ -77,5 +78,8 @@ export const Mutations = {
   },
   inRoomDetailsSuccess (state, payload) {
     state.inRoomDetails = 1
+  },
+  getFriendListSuccess (state, payload) {
+    state.friendList = payload
   }
 }

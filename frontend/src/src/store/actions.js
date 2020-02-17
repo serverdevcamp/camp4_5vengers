@@ -76,7 +76,7 @@ export const Actions = {
   },
   getRoomList ({ commit }, payload) {
     axios.post('http://localhost:3003/room/main', payload).then(response => {
-      console.log('here actions', response.data.data)
+      console.log('here get room list actions', response.data.data)
       commit('getRoomListSuccess', response.data.data)
     })
   },
@@ -85,5 +85,18 @@ export const Actions = {
   },
   inRoomDetails ({ commit }, payload) {
     commit('inRoomDetailsSuccess')
+  },
+  getFriendList ({ commit }, payload) {
+    axios.post('http://localhost:3003/room/friendList', payload).then(response => {
+      if (response.data.status === 200) {
+        commit('getFriendListSuccess', response.data.data)
+      }
+    })
+  },
+  createRoom ({ commit }, payload) {
+    axios.post('http://localhost:3003/room/create', payload).then(response => {
+      if (response.data.status === 200) {
+      }
+    })
   }
 }

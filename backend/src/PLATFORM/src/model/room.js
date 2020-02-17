@@ -18,40 +18,6 @@ module.exports = {
             let userIdx;
             let dataArray = []; // client에게 보내줄 data: []
 
-            // 목록 조회 시 필요한것: 방제목, 방 인원수, 마지막 메세지&시간, 멤버 프사들(최대 4개), 안읽은 메세지 개수
-
-            // 1. 토큰 받아온거에서 유저 인덱스 꺼내기
-            // 2. (room_person)user_idx에 해당하는 room_idx, room_name 꺼내오기 ==> 방제목 OK
-            // 3. (chatting) regist_dt 정렬 해놓고 room_idx에 해당하는 것 중 가장 먼저 있는거 뽑아오기 ==> 마지막 메세지, 시간 OK
-            // 4. (room) room.idx = room_idx 일때 mem_count, member 가져오기 ==> 방 인원수 OK 
-            // 5. member에 해당하는 사람 프사 가져오기 ==> 멤버 프사들 OK
-            // 6. (room_person) 내 user_idx와 그 room_idx로 last (마지막으로 읽은 메세지 인덱스) 가져옴, 
-            //    (chatting) idx가 last 보다 크고 해당 room_idx인거의 개수만 셈 ==> 안읽은 메세지 개수 OK
-
-            // [room_person] => room_idx, room_name, last_msg_idx
-            // [room] => mem_count, member
-            // [chatting] => message, regist_dt
-
-
-
-            // {
-            //     status: 200,
-            //     result: OK,
-            //     data: [
-            //         {
-            //             room_idx: 12,
-            //             room_name: "패밀리",
-            //             mem_count: 4,
-            //             mem_profile: ["dddsf","dsfad","sdfsdf","sdfsf],
-            //             last_message_idx: 30,
-            //             recent_msg: "hi",
-            //             recent_msg_time: "16:00",
-            //             not_read_messages: 3
-            //         }
-            //     ]
-            // }
-
-
             let getUserIdxResult = await jwtVerify.verifyAccessToken(accessToken);
             console.log('AFTER VERIFIED:: ', getUserIdxResult);
             userIdx = getUserIdxResult.userIdx;
@@ -84,7 +50,7 @@ module.exports = {
                 dataArray[idx].not_read_messages = countedNotReadMsg[0].count;
             }
 
-            // 채팅방의 최근 메세지 시간, 메세지 내용, 레디스에 저장되어있는 인덱스 추가
+            // 채팅방의 최근 메세지 시간, 메세지 내용 추가
             let selectRecentMsgQuery = `
             SELECT message, regist_dt
             FROM chatting
@@ -98,8 +64,14 @@ module.exports = {
             for (var idx = 0; idx < dataArray.length; idx++) {
                 if (dataArray[idx].not_read_messages == 0) {
                     let selectedRecentMsg = await db.queryParam_Parse(selectLastReadMsgQuery, [dataArray[idx].room_idx, dataArray[idx].last_msg_idx]);
-                    dataArray[idx].recent_msg = selectedRecentMsg[0].message;
-                    dataArray[idx].recent_msg_time = moment(new Date(parseInt(selectedRecentMsg[0].regist_dt))).format("HH:mm");
+                    if (selectedRecentMsg.length == 0) { // 채팅방이 막 개설됐을 경우, 아무것도 없음
+                        dataArray[idx].recent_msg = '';
+                        dataArray[idx].recent_msg_time = '';
+                    } else {
+                        dataArray[idx].recent_msg = selectedRecentMsg[0].message;
+                        dataArray[idx].recent_msg_time = moment(new Date(parseInt(selectedRecentMsg[0].regist_dt))).format("HH:mm");
+                    }
+                   
                 } else {
                     let selectedRecentMsg = await db.queryParam_Parse(selectRecentMsgQuery, [dataArray[idx].room_idx, dataArray[idx].last_msg_idx]);
                     dataArray[idx].recent_msg = selectedRecentMsg[0].message;
@@ -141,7 +113,94 @@ module.exports = {
 
 
         });
+    },
+    // 채팅방 
+    friendList: ({ accessToken }) => {
+        return new Promise(async (resolve, reject) => {
+            let userIdx;
+            let dataArray = []; // client에게 보내줄 data: []
+            let friendsIdxArray = [];
 
+            let getUserIdxResult = await jwtVerify.verifyAccessToken(accessToken);
+            userIdx = getUserIdxResult.userIdx;
 
+            let selectFriendsQuery = `
+            SELECT friends
+            FROM user
+            WHERE idx = ? `;
+
+            let selectedFriends = await db.queryParam_Parse(selectFriendsQuery, [userIdx]);
+            friendsIdxArray = JSON.parse(selectedFriends[0].friends).friends;
+
+            let selectFriendInfoQuery = `
+            SELECT idx, nick, profile
+            FROM user
+            WHERE idx IN (?) `;
+
+            let selectedFriendInfo = await db.queryParam_Parse(selectFriendInfoQuery, [friendsIdxArray])
+            console.log('friend info:: ', selectedFriendInfo)
+
+            for (var i = 0; i < selectedFriendInfo.length; i++) {
+                let dataObject = {};
+                dataObject.user_idx = selectedFriendInfo[i].idx;
+                dataObject.user_nick = selectedFriendInfo[i].nick;
+                dataObject.user_profile = JSON.parse(selectedFriendInfo[i].profile).profile_front;
+                dataArray.push(dataObject);
+            }
+
+            resolve({
+                code: 200,
+                json: util.successTrue(statusCode.OK, "친구 목록 조회 성공", dataArray)
+            });
+
+        });
+    },
+    create: ({ accessToken, members }) => {
+        return new Promise(async (resolve, reject) => {
+            let userIdx;
+            let membersIdxArray = (JSON.parse(members)).members;
+            let membersNickArray = [];
+            let roomName = '';
+            let roomIdx;
+            let insertOjbect = {};
+
+            let getUserIdxResult = await jwtVerify.verifyAccessToken(accessToken);
+            userIdx = getUserIdxResult.userIdx;
+            membersIdxArray.push(userIdx); // 내 idx 마지막에 추가
+            insertOjbect.members = membersIdxArray;
+
+            let selectMemNickQuery = `
+            SELECT nick
+            FROM user
+            WHERE idx IN (?) `;
+            let selectedMemNick = await db.queryParam_Parse(selectMemNickQuery, [membersIdxArray]);
+
+            for (var i = 0; i<selectedMemNick.length; i++) {
+                if (selectedMemNick.length == 2 ) {
+                    roomName = selectedMemNick[0].nick;
+                } else {
+                    if (i < selectedMemNick.length-1) roomName += selectedMemNick[i].nick + ", "; 
+                    else if (i == selectedMemNick.length-1) roomName += selectedMemNick[i].nick;
+                }
+            }
+
+            let insertRoomQuery = `
+            INSERT INTO room
+            VALUES(?,?,?,?,?,?) `;
+            let insertedUser = await db.queryParam_Parse(insertRoomQuery, [null, JSON.stringify(insertOjbect), membersIdxArray.length, moment.now(), moment.now(), roomName]);
+            
+            let insertRoomPersonQuery = `
+            INSERT INTO room_person
+            VALUES(?,?,?,?,?,?,?,?) `;
+            
+            for (var idx = 0; idx < membersIdxArray.length; idx ++) {
+                let insertedRoomPerson = await db.queryParam_Parse(insertRoomPersonQuery, [null, membersIdxArray[idx], insertedUser.insertId, roomName, null, null, 0, 0, null]);
+            }
+            
+            resolve({
+                code: 200,
+                json: util.successTrueNoData(statusCode.OK, "채팅방 개설 성공")
+            });
+        });
     }
 };
