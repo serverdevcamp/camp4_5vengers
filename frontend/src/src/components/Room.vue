@@ -152,8 +152,8 @@ export default {
   mounted: function () {
     console.log('inRoomDetails : ', this.inRoomDetails)
     const object = {
-      roomIdx: this.$store.room_idx,
-      userIdx: 8,
+      roomIdx: this.roomIdx,
+      userIdx: this.userIdx,
       inRoomDetails: this.inRoomDetails // mapGetters에서 가져오기
     }
     this.$store.dispatch('changeRoomIdx', object)

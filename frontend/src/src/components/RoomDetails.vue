@@ -32,14 +32,14 @@
                 <div class="col-sm-12">
                     <ul class="list-group" v-bind:value="readCount"  v-for="(message, index) in messages" :key="index" track-by="$index">
                         <!--타인-->
-                        <li class="message-item" v-bind:value="readCount_idx" v-if="message.user_idx !== 8 && message.room_idx === 0" >
+                        <li class="message-item" v-bind:value="readCount_idx" v-if="message.user_idx !== userIdx && message.room_idx === roomIdx" >
                             <img v-bind:src="message.front_img" class="rounded-circle float-middle mr-1 message-group"> {{ message.message }}
                             <small class="text-muted">{{ message.nick }} @ {{ formatMessageDate(message.regist_dt) }} {{ readCount[index] }}</small>
                             <!--읽은 메세지 수-->
                             <!--online_dt > offline_dt 이면 지금 접속 중이라는 것 -->
                         </li>
                         <!-- 자신-->
-                        <li class="message-item-me" v-bind:value="readCount_idx" v-if="message.user_idx === 8 && message.room_idx === 0">
+                        <li class="message-item-me" v-bind:value="readCount_idx" v-if="message.user_idx === userIdx && message.room_idx === roomIdx">
                             <!--읽은 메세지 수-->
                             <small class="text-muted">{{ readCount[index] }} {{ "나" }} @ {{ formatMessageDate(message.regist_dt) }}</small>
                             {{ message.message }} <img v-bind:src="message.front_img" class="rounded-circle float-middle mr-2 message-group">
@@ -115,8 +115,8 @@ export default {
       if (this.message !== '\n') {
         var info = ({
           message: this.message,
-          userIdx: 8, // 일단 임시로 userIdx 3인 유저로 test
-          room_idx: 0,
+          userIdx: this.userIdx, // 일단 임시로 userIdx 3인 유저로 test
+          room_idx: this.roomIdx,
           mem_count: this.count// 채팅방의 인원수를 가져오기
         })
         this.socket.emit('send', info)
@@ -130,6 +130,7 @@ export default {
       return moment(date).format('h:mm:ss a')
     },
     socketConnect () {
+      console.log('들어왔드아~~~~~~~~~~~~~~~~~~~~~')
       // 소켓 연결
       //   var room = ({
       //     room_idx: 0
@@ -154,7 +155,7 @@ export default {
         var temp = []
         var i = 0
         for (i = 0; i < messages.length; i++) {
-          if (messages[i].room_idx === 0) { // 같은 방 번호이고
+          if (messages[i].room_idx === this.roomIdx) { // 같은 방 번호이고
             temp.push(messages[i])
           }
         }
@@ -175,29 +176,35 @@ export default {
       })
       //   this.$store.readCount = temp
       this.readCount = temp
+
+      this.socket.on('readSend', function (readSend) {
+        temp.push(readSend)
+      })
+      this.readCount = temp
     }
   },
   mounted: function () {
-    this.socket = io.connect('http://localhost:3002', { transports: ['websocket'], query: 'roomIdx=0' })// 여기에 room_idx를 전달해주기
+    this.socket = io.connect('http://localhost:3002', { transports: ['websocket'], query: 'roomIdx=2' })// 여기에 room_idx를 전달해주기
     // 일단 들어오면, db online_dt update 하기 && 읽은 메세지 수 update하기(만약 이 유저가 이미 읽은 메세지가 있으면 그대로 두고 안 읽은 메세지가 있으면 읽은 메세지 수 감소)
     // 채팅방 이름, 채팅방 인원수 불러오기
-    this.$store.room_idx = 0
+    // this.$store.room_idx = this.roomIdx
     this.readCount_idx = -1
     this.$store.dispatch('inRoomDetails')
     // 들어올 때마다 last이후의 메세지들의 reader에 자기 자신 idx추가하고 regist_count-- 하기!
     var info = ({
-      userIdx: 8, // 일단 임시로 userIdx 8인 유저로 test
-      roomIdx: this.$store.room_idx
+      userIdx: this.userIdx, // 일단 임시로 userIdx 8인 유저로 test
+      roomIdx: this.roomIdx
     })
     // this.$store.dispatch('readCount', info)
     this.socket.emit('read', info)
+    this.socket.emit()
     const object = {
-      roomIdx: this.$store.room_idx,
-      userIdx: 8
+      roomIdx: this.roomIdx,
+      userIdx: this.userIdx
     }
     this.$store.dispatch('changeOnlineIdx', object)
     var roomInfo = ({
-      room_idx: this.$store.room_idx
+      room_idx: this.roomIdx
     })
     this.$store.dispatch('getRoomInfo', roomInfo)
     this.socketConnect()
@@ -206,12 +213,13 @@ export default {
   computed: {
     ...mapGetters({
       room: 'roomName',
-      count: 'memCount'
+      count: 'memCount',
+      userIdx: 'idxInfo',
+      roomIdx: 'roomIdx'
     //   inRoomDetails: 'inRoomDetails'
     //   readCount: 'readCount'
     })
   }
-
 }
 </script>
 

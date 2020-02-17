@@ -25,6 +25,10 @@ export const roomInfoGetters = {
 
   memCount (state, getters) {
     return state.mem_count
+  },
+
+  roomIdx (state, getter) {
+    return state.room_idx
   }
 }
 
