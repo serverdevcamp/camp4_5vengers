@@ -122,7 +122,7 @@ export const Actions = {
   acceptRequest ({ commit }, payload) {
     axios.post('http://localhost:3003/request/accept', payload).then(response => {
       if (response.data.status === 200) {
-        commit('acceptRequestSuccess')
+        commit('acceptRequestSuccess', response.data.data)
       }
     })
   }

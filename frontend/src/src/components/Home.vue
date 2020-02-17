@@ -149,7 +149,7 @@
                                     <v-img :src="(request.sender_profile)" class="img-user" contain></v-img>
                                 </v-avatar>
                                 <v-flex md7 wrap p-0 style="margin-left: 2%; margin-top: 3%;">{{ request.sender_name }}님이 친구를 요청하였습니다.</v-flex>
-                                <v-btn btnAccept @click="clickRequestAccept(index)" md1 style="margin-top: 1.5%; margin-left: 2%;" outlined v-bind:disabled="acceptClicked">수락</v-btn>
+                                <v-btn @click="clickRequestAccept(index)" md1 style="margin-top: 1.5%; margin-left: 2%;" outlined>수락</v-btn>
                             </v-flex>
                         </v-flex>
 
@@ -176,7 +176,7 @@ export default {
       requestDialogClicked: false,
       sendRequestClicked: 1,
       receiveRequestClicked: 0,
-      acceptClicked: false
+      acceptClicked: []
     }
   },
   methods: {
@@ -194,9 +194,6 @@ export default {
         from: this.receiveRequestList[index].sender
       }
       this.$store.dispatch('acceptRequest', object)
-      this.$store.dispatch('getReceiveRequestList', { accessToken: this.userToken })
-      //  this.$el('btnAccept').
-      this.acceptClicked = true
     },
     requestDialogClick () {
       this.requestDialogClicked = true
@@ -220,6 +217,10 @@ export default {
     }
     this.$store.dispatch('getSendRequestList', object)
     this.$store.dispatch('getReceiveRequestList', object)
+
+    for (var idx in this.receiveRequestList) {
+      this.acceptClicked[idx] = false
+    }
   },
   mounted: function () {
     console.log('mounted')

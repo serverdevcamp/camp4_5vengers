@@ -93,6 +93,6 @@ export const Mutations = {
     state.receiveRequestList = payload
   },
   acceptRequestSuccess (state, payload) {
-
+    state.receiveRequestList = payload
   }
 }
