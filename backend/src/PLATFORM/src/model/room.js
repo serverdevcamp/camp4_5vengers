@@ -71,7 +71,7 @@ module.exports = {
                         dataArray[idx].recent_msg = selectedRecentMsg[0].message;
                         dataArray[idx].recent_msg_time = moment(new Date(parseInt(selectedRecentMsg[0].regist_dt))).format("HH:mm");
                     }
-                   
+
                 } else {
                     let selectedRecentMsg = await db.queryParam_Parse(selectRecentMsgQuery, [dataArray[idx].room_idx, dataArray[idx].last_msg_idx]);
                     dataArray[idx].recent_msg = selectedRecentMsg[0].message;
@@ -130,28 +130,38 @@ module.exports = {
             WHERE idx = ? `;
 
             let selectedFriends = await db.queryParam_Parse(selectFriendsQuery, [userIdx]);
-            friendsIdxArray = JSON.parse(selectedFriends[0].friends).friends;
 
-            let selectFriendInfoQuery = `
-            SELECT idx, nick, profile
-            FROM user
-            WHERE idx IN (?) `;
+            if (selectedFriends[0].friends == '' || selectedFriends[0].friends == null) {
+                resolve({
+                    code: 200,
+                    json: util.successTrue(statusCode.OK, "친구 목록 조회 성공", [])
+                });
+            } else {
+                friendsIdxArray = JSON.parse(selectedFriends[0].friends).friends;
 
-            let selectedFriendInfo = await db.queryParam_Parse(selectFriendInfoQuery, [friendsIdxArray])
-            console.log('friend info:: ', selectedFriendInfo)
+                let selectFriendInfoQuery = `
+                SELECT idx, nick, profile
+                FROM user
+                WHERE idx IN (?) `;
 
-            for (var i = 0; i < selectedFriendInfo.length; i++) {
-                let dataObject = {};
-                dataObject.user_idx = selectedFriendInfo[i].idx;
-                dataObject.user_nick = selectedFriendInfo[i].nick;
-                dataObject.user_profile = JSON.parse(selectedFriendInfo[i].profile).profile_front;
-                dataArray.push(dataObject);
+                let selectedFriendInfo = await db.queryParam_Parse(selectFriendInfoQuery, [friendsIdxArray])
+
+                for (var i = 0; i < selectedFriendInfo.length; i++) {
+                    let dataObject = {};
+                    dataObject.user_idx = selectedFriendInfo[i].idx;
+                    dataObject.user_nick = selectedFriendInfo[i].nick;
+                    dataObject.user_profile = JSON.parse(selectedFriendInfo[i].profile).profile_front;
+                    dataArray.push(dataObject);
+
+                    if (selectedFriendInfo.length == 0) break;
+                }
+
+                resolve({
+                    code: 200,
+                    json: util.successTrue(statusCode.OK, "친구 목록 조회 성공", dataArray)
+                });
             }
 
-            resolve({
-                code: 200,
-                json: util.successTrue(statusCode.OK, "친구 목록 조회 성공", dataArray)
-            });
 
         });
     },
@@ -175,12 +185,12 @@ module.exports = {
             WHERE idx IN (?) `;
             let selectedMemNick = await db.queryParam_Parse(selectMemNickQuery, [membersIdxArray]);
 
-            for (var i = 0; i<selectedMemNick.length; i++) {
-                if (selectedMemNick.length == 2 ) {
+            for (var i = 0; i < selectedMemNick.length; i++) {
+                if (selectedMemNick.length == 2) {
                     roomName = selectedMemNick[0].nick;
                 } else {
-                    if (i < selectedMemNick.length-1) roomName += selectedMemNick[i].nick + ", "; 
-                    else if (i == selectedMemNick.length-1) roomName += selectedMemNick[i].nick;
+                    if (i < selectedMemNick.length - 1) roomName += selectedMemNick[i].nick + ", ";
+                    else if (i == selectedMemNick.length - 1) roomName += selectedMemNick[i].nick;
                 }
             }
 
@@ -188,15 +198,15 @@ module.exports = {
             INSERT INTO room
             VALUES(?,?,?,?,?,?) `;
             let insertedUser = await db.queryParam_Parse(insertRoomQuery, [null, JSON.stringify(insertOjbect), membersIdxArray.length, moment.now(), moment.now(), roomName]);
-            
+
             let insertRoomPersonQuery = `
             INSERT INTO room_person
             VALUES(?,?,?,?,?,?,?,?) `;
-            
-            for (var idx = 0; idx < membersIdxArray.length; idx ++) {
+
+            for (var idx = 0; idx < membersIdxArray.length; idx++) {
                 let insertedRoomPerson = await db.queryParam_Parse(insertRoomPersonQuery, [null, membersIdxArray[idx], insertedUser.insertId, roomName, null, null, 0, 0, null]);
             }
-            
+
             resolve({
                 code: 200,
                 json: util.successTrueNoData(statusCode.OK, "채팅방 개설 성공")

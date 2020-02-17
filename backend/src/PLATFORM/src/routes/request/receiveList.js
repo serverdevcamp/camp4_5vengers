@@ -10,7 +10,7 @@ router.post('/', async (req, res) => {
 
         console.log("token:: ", accessToken);
 
-        Request.sendList({ accessToken })
+        Request.receiveList({ accessToken })
             .then(({ code, json }) => res.status(code).send(json))
             .catch(err => {
                 console.log(err);

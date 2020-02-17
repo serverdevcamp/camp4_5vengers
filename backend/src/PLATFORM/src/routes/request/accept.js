@@ -6,11 +6,11 @@ const Request = require('../../model/request');
 
 router.post('/', async (req, res) => {
     try {
-        const { accessToken } = req.body;
+        const { accessToken, from } = req.body;
 
         console.log("token:: ", accessToken);
 
-        Request.sendList({ accessToken })
+        Request.accept({ accessToken, from })
             .then(({ code, json }) => res.status(code).send(json))
             .catch(err => {
                 console.log(err);

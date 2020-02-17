@@ -81,5 +81,14 @@ export const Mutations = {
   },
   getFriendListSuccess (state, payload) {
     state.friendList = payload
+  },
+  getSendRequestListSuccess (state, payload) {
+    state.sendRequestList = payload
+  },
+  getReceiveRequestListSuccess (state, payload) {
+    state.receiveRequestList = payload
+  },
+  acceptRequestSuccess (state, payload) {
+
   }
 }
