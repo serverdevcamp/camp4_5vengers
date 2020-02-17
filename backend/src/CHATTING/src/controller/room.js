@@ -7,6 +7,7 @@ var moment = require('moment');
 var room = 'offline 시간'
 var room_on = 'online 시간'
 var readCount = 'readCount'
+var roomName = '채팅방 이름'
 
 module.exports = {
     //offline update
@@ -80,4 +81,22 @@ module.exports = {
             return;
         });
     },
+    updateRoomName : (room_name, room_idx) => {
+        return new Promise(async(resolve, reject) => {
+            const updateRoomNameQuery = 'UPDATE room SET room_name = ? WHERE idx = ?';
+            const updateRoomNameResult = await db.queryParam_Parse(updateRoomNameQuery ,[room_name, room_idx]);
+            if(updateRoomNameResult.length == 0){
+                resolve({
+                    code : 200,
+                    json : util.successFalse(statusCode.HOME_SHOW_FAIL, resMessage.X_UPDATE_FAIL(roomName))
+                });
+                return;
+            }
+            resolve({
+                code : 200,
+                json : util.successTrue(statusCode.HOME_SHOW_FAIL, resMessage.X_UPDATE_SUCCESS(roomName), room_name)
+            });
+            return;
+        });
+    }
 }

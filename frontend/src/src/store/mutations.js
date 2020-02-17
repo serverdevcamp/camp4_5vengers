@@ -81,5 +81,9 @@ export const Mutations = {
   },
   getFriendListSuccess (state, payload) {
     state.friendList = payload
+  },
+  settingsSuccess (state, payload) {
+    console.log('수정한 방 이름 : ', payload)
+    state.room_name = payload.room_name
   }
 }

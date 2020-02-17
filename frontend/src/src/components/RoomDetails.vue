@@ -8,7 +8,7 @@
                     </v-avatar>
 
                     <v-flex>
-                        <v-flex wrap v-model="room_name" class="chat-name" v-bind:value="room_name" text-md-center mx-1 pb-1 md1>{{ room }}</v-flex>
+                        <v-flex wrap v-model="room_name" class="chat-name" v-bind:value="room_name" text-md-center mx-1 pb-1 md1>{{ room_name }}</v-flex>
                         <v-flex row grid-list-md ml-3 p-0>
                             <!-- <v-flex class="icon-num" text-md-left md1 pb-0> -->
                                 <img src="../assets/user.png" class="icon-user"/>
@@ -73,17 +73,17 @@
         </v-flex>
 
         <!-- 설정 클릭 -->
-        <form @submit.prevent="settingsMethod" fixed>
-            <v-dialog @close.prevent="settingsMethod" v-model="settingsClicked" max-width="380">
-                <v-card class="settingsCard">
-                    <v-flex wrap column grid-list-md align-center lt-sign>
-                        <div class="profileDetailText">채팅방 이름</div>
-                        <v-text-field class="room_text" solo v-bind:placeholder="room_name" v-model="room_name" required></v-text-field>
+        <v-dialog v-model="settingsClicked" max-width="380">
+            <v-card class="settingsCard">
+                <v-flex wrap column grid-list-md align-center lt-sign>
+                    <v-flex class="profileDetailText">채팅방 이름</v-flex>
+                    <form  @submit.prevent="settingsMethod">
+                        <v-text-field v-model="room_name" class="room_text" solo v-bind:placeholder="room" required></v-text-field>
                         <v-btn medium color="normal" class='btn-login' type="submit">수정</v-btn>
-                    </v-flex>
-                </v-card>
-            </v-dialog>
-        </form>
+                    </form>
+                </v-flex>
+            </v-card>
+        </v-dialog>
         <!-- 설정 클릭 -->
 
     </v-layout>
@@ -99,7 +99,7 @@ export default {
   data () {
     return {
       settingsClicked: false,
-      room_name: '',
+      room_name: this.room,
       mem_count: '',
       message: '',
       messages: [], // 내가 아닌 타인이 보낸 메세지
@@ -122,6 +122,14 @@ export default {
         this.socket.emit('send', info)
         this.message = ''
       }
+    },
+    settingsMethod: function () {
+      console.log('ggggggggggggggggggggg')
+      const object = {
+        roomName: this.room_name,
+        roomIdx: this.roomIdx
+      }
+      this.$store.dispatch('settings', object)
     },
     formatMemberDate: function (date) {
       return moment(date).format('h:mm:ss a')
@@ -208,6 +216,7 @@ export default {
     })
     this.$store.dispatch('getRoomInfo', roomInfo)
     this.socketConnect()
+    this.room_name = this.room
   },
 
   computed: {

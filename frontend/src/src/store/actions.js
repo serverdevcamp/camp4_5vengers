@@ -98,5 +98,11 @@ export const Actions = {
       if (response.data.status === 200) {
       }
     })
+  },
+  settings ({ commit }, payload) {
+    axios.post('http://localhost:3001/room/name', payload).then(response => {
+      console.log('응답~~~: ', response)
+      if (response.status === 200) commit('settingsSuccess', response.data)
+    })
   }
 }
