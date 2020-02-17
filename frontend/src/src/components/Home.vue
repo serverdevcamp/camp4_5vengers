@@ -11,7 +11,7 @@
                         <span>1</span>
                     </v-flex>
                     <v-flex text-md-right>
-                        <img src="../assets/bell.png" class="icon-alarm"/>
+                        <img src="../assets/bell.png" class="icon-alarm" @click="requestDialogClicked=true"/>
                         <img src="../assets/user.png" class="icon-friend"/>
                     </v-flex>
                 </v-flex>
@@ -118,6 +118,37 @@
                 </v-card>
             </v-dialog>
 
+             <!-- 요청 알림 다이얼로그 보기 -->
+             <v-dialog v-model="requestDialogClicked" max-width="350">
+                     <v-tabs requestDialogTab color="transparent" slider-color="black">
+                        <v-tab v-on:click="sendRequestClick" style="color:#000000; width: 50%;">보낸 요청</v-tab>
+                        <v-tab v-on:click="receiveRequestClick" style="color:#000000; width: 50%;">받은 요청</v-tab>
+                    </v-tabs>
+
+                    <!-- 보낸 요청 탭이 눌렸을 때 -->
+                    <v-card class="profileCard" v-if="sendRequestClicked===1">
+                        <v-flex v-for="(friend, index) in friends" :key="index" row style="margin-left: 2%; margin-top: 2%" md12>
+                            <v-avatar contain p-0 m-0 wrap md2>
+                                <v-img :src="(friend.user_profile)" class="img-user" contain></v-img>
+                            </v-avatar>
+                            <v-flex md9 wrap class="room-user-nick" text-md-left p-0>{{ friend.user_nick }}</v-flex>
+
+                        </v-flex>
+                    </v-card>
+
+                    <!-- 받은 요청 탭이 눌렸을 때 -->
+                    <v-card class="profileCard" v-if="receiveRequestClicked===1">
+                        <img src="../assets/ming.jpeg" class="profileDetailBack"/>
+                        <img src="../assets/empty-profile.png"  class="profileDetailFront"/>
+
+                        <span class="profileDetailText">홍길동</span>
+                        <span class="profileDetailText" style="top:70%">상태메세지</span>
+
+                        <img src="../assets/speech-bubble.png" style="position:absolute; top:77%; left:43%; width: 50px;"/>
+                        <span style="position:absolute; top:85%; left:42%; color: #ffffff;">1:1 채팅</span>
+                    </v-card>
+            </v-dialog>
+
         </v-layout>
     </v-container>
 </template>
@@ -131,10 +162,21 @@ export default {
     return {
       myProfileClicked: false,
       friendProfileClicked: false,
-      editProfileClicked: false
+      editProfileClicked: false,
+      requestDialogClicked: false,
+      sendRequestClicked: 1,
+      receiveRequestClicked: 0
     }
   },
   methods: {
+    sendRequestClick () {
+      this.sendRequestClicked = 1
+      this.receiveRequestClicked = 0
+    },
+    receiveRequestClick () {
+      this.sendRequestClicked = 0
+      this.receiveRequestClicked = 1
+    }
   },
   computed: {
     ...mapGetters({
@@ -210,5 +252,8 @@ export default {
   left: 10%;
   top: 73%;
   width: 80%;
+}
+.requestDialogTab {
+    text-align: center;
 }
 </style>
