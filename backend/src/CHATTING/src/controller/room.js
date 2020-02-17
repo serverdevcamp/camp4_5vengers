@@ -14,8 +14,8 @@ module.exports = {
         return new Promise(async(resolve, reject) => {
             console.log("유저 : ", user_idx)
             var offline = moment.now();
-            const updateRoomQuery = 'UPDATE room_person SET offline_dt = ? WHERE user_idx = ? AND room_idx = ?';
-            const updateRoomResult = await db.queryParam_Parse(updateRoomQuery ,[offline, user_idx, room_idx]);
+            const updateRoomQuery = 'UPDATE room_person SET offline_dt = ?, status = ? WHERE user_idx = ? AND room_idx = ?';
+            const updateRoomResult = await db.queryParam_Parse(updateRoomQuery ,[offline, 0, user_idx, room_idx]);
             if(updateRoomResult.length == 0){
                 resolve({
                     code : 200,
@@ -42,8 +42,8 @@ module.exports = {
         return new Promise(async(resolve, reject) => {
             console.log("유저 : ", user_idx)
             var offline = moment.now();
-            const updateRoomQuery = 'UPDATE room_person SET online_dt = ? WHERE user_idx = ? AND room_idx = ?';
-            const updateRoomResult = await db.queryParam_Parse(updateRoomQuery ,[offline, user_idx, room_idx]);
+            const updateRoomQuery = 'UPDATE room_person SET online_dt = ?, status = ? WHERE user_idx = ? AND room_idx = ?';
+            const updateRoomResult = await db.queryParam_Parse(updateRoomQuery ,[offline, 1, user_idx, room_idx]);
             if(updateRoomResult.length == 0){
                 resolve({
                     code : 200,
