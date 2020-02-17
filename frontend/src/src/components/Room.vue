@@ -143,7 +143,8 @@ export default {
       roomList: 'roomList',
       userIdx: 'idxInfo',
       inRoomDetails: 'inRoomDetails',
-      friends: 'friendList'
+      friends: 'friendList',
+      roomIdx: 'roomIdx'
     })
   },
   created: function () {
