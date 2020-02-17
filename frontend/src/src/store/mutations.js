@@ -85,5 +85,14 @@ export const Mutations = {
   settingsSuccess (state, payload) {
     console.log('수정한 방 이름 : ', payload)
     state.room_name = payload.room_name
+  },
+  getSendRequestListSuccess (state, payload) {
+    state.sendRequestList = payload
+  },
+  getReceiveRequestListSuccess (state, payload) {
+    state.receiveRequestList = payload
+  },
+  acceptRequestSuccess (state, payload) {
+
   }
 }

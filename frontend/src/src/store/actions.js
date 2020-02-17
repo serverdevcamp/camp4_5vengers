@@ -104,5 +104,26 @@ export const Actions = {
       console.log('응답~~~: ', response)
       if (response.status === 200) commit('settingsSuccess', response.data)
     })
+  },
+  getSendRequestList ({ commit }, payload) {
+    axios.post('http://localhost:3003/request/sendList', payload).then(response => {
+      if (response.data.status === 200) {
+        commit('getSendRequestListSuccess', response.data.data)
+      }
+    })
+  },
+  getReceiveRequestList ({ commit }, payload) {
+    axios.post('http://localhost:3003/request/receiveList', payload).then(response => {
+      if (response.data.status === 200) {
+        commit('getReceiveRequestListSuccess', response.data.data)
+      }
+    })
+  },
+  acceptRequest ({ commit }, payload) {
+    axios.post('http://localhost:3003/request/accept', payload).then(response => {
+      if (response.data.status === 200) {
+        commit('acceptRequestSuccess')
+      }
+    })
   }
 }

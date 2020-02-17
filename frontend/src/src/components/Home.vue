@@ -11,7 +11,7 @@
                         <span>1</span>
                     </v-flex>
                     <v-flex text-md-right>
-                        <img src="../assets/bell.png" class="icon-alarm"/>
+                        <img src="../assets/bell.png" class="icon-alarm" @click="requestDialogClick()"/>
                         <img src="../assets/user.png" class="icon-friend"/>
                     </v-flex>
                 </v-flex>
@@ -118,6 +118,47 @@
                 </v-card>
             </v-dialog>
 
+             <!-- 요청 알림 다이얼로그 보기 -->
+             <v-dialog v-model="requestDialogClicked" max-width="400">
+                     <v-tabs requestDialogTab color="transparent" slider-color="black">
+                        <v-tab v-on:click="sendRequestClick" style="color:#000000; width: 50%;">보낸 요청</v-tab>
+                        <v-tab v-on:click="receiveRequestClick" style="color:#000000; width: 50%;">받은 요청</v-tab>
+                    </v-tabs>
+
+                    <!-- 보낸 요청 탭이 눌렸을 때 -->
+                    <v-card class="profileCard" v-if="sendRequestClicked===1">
+                        <v-flex v-if="this.sendRequestList.length>0">
+                            <v-flex v-for="(request, index) in this.sendRequestList" :key="index" row style="margin-left: 2%;" md12>
+                                <v-avatar contain p-0 m-0 wrap md2>
+                                    <v-img :src="(request.receiver_profile)" class="img-user" contain></v-img>
+                                </v-avatar>
+                                <v-flex md9 wrap p-0 style="margin-left: 2%; margin-top: 3%;">{{ request.receiver_name }}님께 친구를 요청하였습니다.</v-flex>
+                            </v-flex>
+                        </v-flex>
+
+                        <v-flex  v-else style="text-align: center;">
+                            아직 보낸 요청이 없습니다.
+                        </v-flex>
+                    </v-card>
+
+                    <!-- 받은 요청 탭이 눌렸을 때 -->
+                    <v-card class="profileCard" v-if="receiveRequestClicked===1">
+                        <v-flex v-if="this.receiveRequestList.length>0">
+                            <v-flex v-for="(request, index) in this.receiveRequestList" :key="index" row style="margin-left: 2%;" md12>
+                                <v-avatar contain p-0 m-0 wrap md2>
+                                    <v-img :src="(request.sender_profile)" class="img-user" contain></v-img>
+                                </v-avatar>
+                                <v-flex md7 wrap p-0 style="margin-left: 2%; margin-top: 3%;">{{ request.sender_name }}님이 친구를 요청하였습니다.</v-flex>
+                                <v-btn btnAccept @click="clickRequestAccept(index)" md1 style="margin-top: 1.5%; margin-left: 2%;" outlined v-bind:disabled="acceptClicked">수락</v-btn>
+                            </v-flex>
+                        </v-flex>
+
+                        <v-flex  v-else style="text-align: center;">
+                            아직 받은 요청이 없습니다.
+                        </v-flex>
+                    </v-card>
+            </v-dialog>
+
         </v-layout>
     </v-container>
 </template>
@@ -131,18 +172,57 @@ export default {
     return {
       myProfileClicked: false,
       friendProfileClicked: false,
-      editProfileClicked: false
+      editProfileClicked: false,
+      requestDialogClicked: false,
+      sendRequestClicked: 1,
+      receiveRequestClicked: 0,
+      acceptClicked: false
     }
   },
   methods: {
+    sendRequestClick () {
+      this.sendRequestClicked = 1
+      this.receiveRequestClicked = 0
+    },
+    receiveRequestClick () {
+      this.sendRequestClicked = 0
+      this.receiveRequestClicked = 1
+    },
+    clickRequestAccept (index) {
+      const object = {
+        accessToken: this.userToken,
+        from: this.receiveRequestList[index].sender
+      }
+      this.$store.dispatch('acceptRequest', object)
+      this.$store.dispatch('getReceiveRequestList', { accessToken: this.userToken })
+      //  this.$el('btnAccept').
+      this.acceptClicked = true
+    },
+    requestDialogClick () {
+      this.requestDialogClicked = true
+      this.$store.dispatch('getReceiveRequestList', { accessToken: this.userToken })
+      this.$store.dispatch('getSendRequestList', { accessToken: this.userToken })
+    }
   },
   computed: {
     ...mapGetters({
       userNick: 'nickInfo',
-      userIntro: 'introInfo'
+      userIntro: 'introInfo',
+      userToken: 'tokenInfo',
+      sendRequestList: 'sendRequestList',
+      receiveRequestList: 'receiveRequestList'
     })
   },
   created: function () {
+    console.log('created')
+    const object = {
+      accessToken: this.userToken
+    }
+    this.$store.dispatch('getSendRequestList', object)
+    this.$store.dispatch('getReceiveRequestList', object)
+  },
+  mounted: function () {
+    console.log('mounted')
   }
 }
 </script>
@@ -210,5 +290,8 @@ export default {
   left: 10%;
   top: 73%;
   width: 80%;
+}
+.requestDialogTab {
+    text-align: center;
 }
 </style>

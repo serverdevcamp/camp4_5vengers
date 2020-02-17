@@ -49,3 +49,12 @@ export const friendListGetters = {
     return state.friendList
   }
 }
+
+export const requestListGetters = {
+  sendRequestList (state, getters) {
+    return state.sendRequestList
+  },
+  receiveRequestList (state, getters) {
+    return state.receiveRequestList
+  }
+}
