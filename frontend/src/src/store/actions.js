@@ -122,7 +122,14 @@ export const Actions = {
   acceptRequest ({ commit }, payload) {
     axios.post('http://localhost:3003/request/accept', payload).then(response => {
       if (response.data.status === 200) {
-        commit('acceptRequestSuccess')
+        commit('acceptRequestSuccess', response.data.data)
+      }
+    })
+  },
+  getHomeList ({ commit }, payload) {
+    axios.get('http://localhost:3003/home/main', {headers: {'accesstoken': payload.accessToken}}).then(response => {
+      if (response.data.status === 200) {
+        commit('getHomeListSuccess', response.data.data)
       }
     })
   }

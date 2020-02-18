@@ -147,6 +147,10 @@ module.exports = {
                     userInfo.userIdx = comparePwdResult[0].idx;
                     userInfo.accessToken = tempAccessToken;
                     userInfo.refreshToken = tempRefreshToken;
+                    userInfo.userNick = selectUserResult[0].nick;
+                    userInfo.profileFront = JSON.parse(selectUserResult[0].profile).profile_front;
+                    userInfo.profileBack = JSON.parse(selectUserResult[0].profile).profile_back;
+                    userInfo.profileMessage = JSON.parse(selectUserResult[0].profile).profile_message;
                     userInfo.status = comparePwdResult[0].status;
                     resultArray.push(userInfo);
 

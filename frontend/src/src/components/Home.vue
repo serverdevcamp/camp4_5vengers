@@ -8,7 +8,7 @@
                 <v-flex row grid-list-md>
                     <v-flex wrap md1 ml-2>
                         <span>친구</span>
-                        <span>1</span>
+                        <span>{{ friendList.length }}</span>
                     </v-flex>
                     <v-flex text-md-right>
                         <img src="../assets/bell.png" class="icon-alarm" @click="requestDialogClick()"/>
@@ -26,12 +26,12 @@
                     </v-flex>
                     <v-flex row wrap grid-list-md ml-1 p-0>
                         <v-avatar wrap p-0 m-0>
-                            <v-img :src="require('../assets/ming.jpeg')" class="img-user" contain @click="myProfileClicked=true"></v-img>
+                            <v-img :src="(userProfileFront)" class="img-user" contain @click="myProfileClicked=true"></v-img>
                         </v-avatar>
 
                         <v-flex>
-                            <v-flex class="text-nick" text-md-left pb-0>홍길동</v-flex>
-                            <v-flex class="text-intro" text-md-left pt-0>상태메세지</v-flex>
+                            <v-flex class="text-nick" text-md-left pb-0>{{ userNick }}</v-flex>
+                            <v-flex class="text-intro" text-md-left pt-0>{{ userIntro }}</v-flex>
                         </v-flex>
                     </v-flex>
 
@@ -43,14 +43,14 @@
                     <v-flex wrap text-md-left>
                         <span>친구</span>
                     </v-flex>
-                    <v-flex row wrap grid-list-md ml-1 p-0>
+                    <v-flex v-for="(friend, index) in friendList" :key="index" row wrap grid-list-md ml-1 p-0>
                         <v-avatar wrap p-0 m-0>
-                            <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain @click="friendProfileClicked=true"></v-img>
+                            <v-img :src="(friend.profile_front)" class="img-user" contain @click="friendProfileClicked=true"></v-img>
                         </v-avatar>
 
                         <v-flex>
-                            <v-flex class="text-nick" text-md-left pb-0>홍길동</v-flex>
-                            <v-flex class="text-intro" text-md-left pt-0>상태메세지</v-flex>
+                            <v-flex class="text-nick" text-md-left pb-0>{{ friend.user_nick }}</v-flex>
+                            <v-flex class="text-intro" text-md-left pt-0>{{ friend.profile_message }}</v-flex>
                         </v-flex>
                     </v-flex>
                 </v-flex>
@@ -149,7 +149,7 @@
                                     <v-img :src="(request.sender_profile)" class="img-user" contain></v-img>
                                 </v-avatar>
                                 <v-flex md7 wrap p-0 style="margin-left: 2%; margin-top: 3%;">{{ request.sender_name }}님이 친구를 요청하였습니다.</v-flex>
-                                <v-btn btnAccept @click="clickRequestAccept(index)" md1 style="margin-top: 1.5%; margin-left: 2%;" outlined v-bind:disabled="acceptClicked">수락</v-btn>
+                                <v-btn @click="clickRequestAccept(index)" md1 style="margin-top: 1.5%; margin-left: 2%;" outlined>수락</v-btn>
                             </v-flex>
                         </v-flex>
 
@@ -176,7 +176,7 @@ export default {
       requestDialogClicked: false,
       sendRequestClicked: 1,
       receiveRequestClicked: 0,
-      acceptClicked: false
+      acceptClicked: []
     }
   },
   methods: {
@@ -194,9 +194,6 @@ export default {
         from: this.receiveRequestList[index].sender
       }
       this.$store.dispatch('acceptRequest', object)
-      this.$store.dispatch('getReceiveRequestList', { accessToken: this.userToken })
-      //  this.$el('btnAccept').
-      this.acceptClicked = true
     },
     requestDialogClick () {
       this.requestDialogClicked = true
@@ -211,19 +208,19 @@ export default {
       userToken: 'tokenInfo',
       sendRequestList: 'sendRequestList',
       receiveRequestList: 'receiveRequestList',
-      userIdx: 'idxInfo'
+      userProfileFront: 'profileFrontInfo',
+      userProfileBack: 'profileBackInfo',
+      friendList: 'homeList'
     })
   },
   created: function () {
-    console.log('created')
     const object = {
       accessToken: this.userToken
     }
     this.$store.dispatch('getSendRequestList', object)
     this.$store.dispatch('getReceiveRequestList', object)
-  },
-  mounted: function () {
-    console.log('mounted')
+    this.$store.dispatch('getHomeList', object)
+    console.log('friend!!:: ', this.friendList)
   }
 }
 </script>

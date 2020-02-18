@@ -12,6 +12,10 @@ export const Mutations = {
     console.log('signInSuccess')
     state.userIdx = payload.data[0].userIdx
     state.userToken = payload.data[0].accessToken
+    state.userNick = payload.data[0].userNick
+    state.userIntro = payload.data[0].profileMessage
+    state.userProfileFront = payload.data[0].profileFront
+    state.userProfileBack = payload.data[0].profileBack
 
     VueCookies.set('accessToken', payload.data[0].accessToken, '1d')
     VueCookies.set('refreshToken', payload.data[0].refreshToken, '2d')
@@ -93,6 +97,9 @@ export const Mutations = {
     state.receiveRequestList = payload
   },
   acceptRequestSuccess (state, payload) {
-
+    state.receiveRequestList = payload
+  },
+  getHomeListSuccess (state, payload) {
+    state.homeList = payload
   }
 }

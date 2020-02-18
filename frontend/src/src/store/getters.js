@@ -9,12 +9,17 @@ export const userInfoGetters = {
   nickInfo (state, getters) {
     return state.userNick
   },
-
   introInfo (state, getters) {
     return state.userIntro
   },
   idxInfo (state, getters) {
     return state.userIdx
+  },
+  profileFrontInfo (state, getters) {
+    return state.userProfileFront
+  },
+  profileBackInfo (state, getters) {
+    return state.userProfileBack
   }
 }
 
@@ -56,5 +61,11 @@ export const requestListGetters = {
   },
   receiveRequestList (state, getters) {
     return state.receiveRequestList
+  }
+}
+
+export const homeListGetters = {
+  homeList (state, getters) {
+    return state.homeList
   }
 }
