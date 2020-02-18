@@ -210,7 +210,8 @@ export default {
       userIntro: 'introInfo',
       userToken: 'tokenInfo',
       sendRequestList: 'sendRequestList',
-      receiveRequestList: 'receiveRequestList'
+      receiveRequestList: 'receiveRequestList',
+      userIdx: 'idxInfo'
     })
   },
   created: function () {
