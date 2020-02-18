@@ -8,7 +8,7 @@
                 <v-flex row grid-list-md>
                     <v-flex wrap md1 ml-2>
                         <span>친구</span>
-                        <span>1</span>
+                        <span>{{ friendList.length }}</span>
                     </v-flex>
                     <v-flex text-md-right>
                         <img src="../assets/bell.png" class="icon-alarm" @click="requestDialogClick()"/>
