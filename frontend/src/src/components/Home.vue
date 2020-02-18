@@ -26,12 +26,12 @@
                     </v-flex>
                     <v-flex row wrap grid-list-md ml-1 p-0>
                         <v-avatar wrap p-0 m-0>
-                            <v-img :src="require('../assets/ming.jpeg')" class="img-user" contain @click="myProfileClicked=true"></v-img>
+                            <v-img :src="(userProfileFront)" class="img-user" contain @click="myProfileClicked=true"></v-img>
                         </v-avatar>
 
                         <v-flex>
-                            <v-flex class="text-nick" text-md-left pb-0>홍길동</v-flex>
-                            <v-flex class="text-intro" text-md-left pt-0>상태메세지</v-flex>
+                            <v-flex class="text-nick" text-md-left pb-0>{{ userNick }}</v-flex>
+                            <v-flex class="text-intro" text-md-left pt-0>{{ userIntro }}</v-flex>
                         </v-flex>
                     </v-flex>
 
@@ -43,14 +43,14 @@
                     <v-flex wrap text-md-left>
                         <span>친구</span>
                     </v-flex>
-                    <v-flex row wrap grid-list-md ml-1 p-0>
+                    <v-flex v-for="(friend, index) in friendList" :key="index" row wrap grid-list-md ml-1 p-0>
                         <v-avatar wrap p-0 m-0>
-                            <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain @click="friendProfileClicked=true"></v-img>
+                            <v-img :src="(friend.profile_front)" class="img-user" contain @click="friendProfileClicked=true"></v-img>
                         </v-avatar>
 
                         <v-flex>
-                            <v-flex class="text-nick" text-md-left pb-0>홍길동</v-flex>
-                            <v-flex class="text-intro" text-md-left pt-0>상태메세지</v-flex>
+                            <v-flex class="text-nick" text-md-left pb-0>{{ friend.user_nick }}</v-flex>
+                            <v-flex class="text-intro" text-md-left pt-0>{{ friend.profile_message }}</v-flex>
                         </v-flex>
                     </v-flex>
                 </v-flex>
@@ -207,23 +207,20 @@ export default {
       userIntro: 'introInfo',
       userToken: 'tokenInfo',
       sendRequestList: 'sendRequestList',
-      receiveRequestList: 'receiveRequestList'
+      receiveRequestList: 'receiveRequestList',
+      userProfileFront: 'profileFrontInfo',
+      userProfileBack: 'profileBackInfo',
+      friendList: 'homeList'
     })
   },
   created: function () {
-    console.log('created')
     const object = {
       accessToken: this.userToken
     }
     this.$store.dispatch('getSendRequestList', object)
     this.$store.dispatch('getReceiveRequestList', object)
-
-    for (var idx in this.receiveRequestList) {
-      this.acceptClicked[idx] = false
-    }
-  },
-  mounted: function () {
-    console.log('mounted')
+    this.$store.dispatch('getHomeList', object)
+    console.log('friend!!:: ', this.friendList)
   }
 }
 </script>

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { Getters, userInfoGetters, roomInfoGetters, roomListGetters, inRoomDetailsGetters, friendListGetters, requestListGetters } from './getters.js'
+import { Getters, userInfoGetters, roomInfoGetters, roomListGetters, inRoomDetailsGetters, friendListGetters, requestListGetters, homeListGetters } from './getters.js'
 import { Mutations } from './mutations.js'
 import { Actions } from './actions.js'
 import * as Cookies from 'js-cookie'
@@ -28,10 +28,11 @@ export const store = new Vuex.Store({
     inRoomDetails: 0,
     freindList: [],
     sendRequestList: [],
-    receiveRequestList: []
+    receiveRequestList: [],
+    homeList: []
   },
   mutations: Object.assign({}, Mutations),
-  getters: Object.assign({}, Getters, userInfoGetters, roomInfoGetters, roomListGetters, inRoomDetailsGetters, friendListGetters, requestListGetters),
+  getters: Object.assign({}, Getters, userInfoGetters, roomInfoGetters, roomListGetters, inRoomDetailsGetters, friendListGetters, requestListGetters, homeListGetters),
   actions: Object.assign({}, Actions),
   plugins: [
     createPersistedState({

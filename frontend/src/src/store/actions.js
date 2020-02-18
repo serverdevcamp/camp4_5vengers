@@ -15,7 +15,7 @@ export const Actions = {
     })
   },
   signIn ({ commit }, payload) {
-    axios.post('http://13.125.153.37:3000/user/signIn', payload).then(response => {
+    axios.post('http://localhost:3000/user/signIn', payload).then(response => {
       if (response.data.status === 200) {
         commit('signInSuccess', response.data)
       } else if (response.data.status === 336) {
@@ -123,6 +123,13 @@ export const Actions = {
     axios.post('http://localhost:3003/request/accept', payload).then(response => {
       if (response.data.status === 200) {
         commit('acceptRequestSuccess', response.data.data)
+      }
+    })
+  },
+  getHomeList ({ commit }, payload) {
+    axios.get('http://localhost:3003/home/main', {headers: {'accesstoken': payload.accessToken}}).then(response => {
+      if (response.data.status === 200) {
+        commit('getHomeListSuccess', response.data.data)
       }
     })
   }
