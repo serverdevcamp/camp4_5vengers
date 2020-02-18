@@ -52,6 +52,9 @@ export const inRoomDetailsGetters = {
 export const friendListGetters = {
   friendList (state, getters) {
     return state.friendList
+  },
+  searchResultList (state, getters) {
+    return state.searchResultList
   }
 }
 

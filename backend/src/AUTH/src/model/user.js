@@ -130,6 +130,7 @@ module.exports = {
                 } else {
                     let payload = {
                         userIdx: comparePwdResult[0].idx,
+                        userName: comparePwdResult[0].name,
                         userId: id,
                         userEmail: comparePwdResult[0].email
                     };

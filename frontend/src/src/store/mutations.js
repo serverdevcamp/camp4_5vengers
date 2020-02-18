@@ -101,5 +101,14 @@ export const Mutations = {
   },
   getHomeListSuccess (state, payload) {
     state.homeList = payload
+  },
+  getEmailSearchResultSuccess (state, payload) {
+    state.searchResultList = payload
+  },
+  getIdSearchResultSuccess (state, payload) {
+    state.searchResultList = payload
+  },
+  resetSearchResult (state, payload) {
+    state.searchResultList = []
   }
 }
