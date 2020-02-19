@@ -151,6 +151,8 @@ export default {
     this.getRoomList()
   },
   mounted: function () {
+    this.getRoomList()
+
     console.log('inRoomDetails : ', this.inRoomDetails)
     const object = {
       roomIdx: this.roomIdx,

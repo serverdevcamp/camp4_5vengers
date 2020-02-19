@@ -18,6 +18,12 @@ var port = process.env.PORT || 3002;
 var Redis = require('ioredis');
 var redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379';
 var redis = new Redis(redis_address);
+// var redis = new Redis({
+//   port: 6379,
+//   host: "127.0.0.1",
+//   connectTimeout: 10000,
+//   password: 0613
+// })
 
 var redis_subscribers = {};
 var channel_history_max = 200;
@@ -48,6 +54,12 @@ app.use('/', indexRouter);
 function add_redis_subscriber(subscriber_key) {
   console.log("???");
   var client = new Redis(redis_address);
+  // var client = new Redis({
+  //   port: 6379,
+  //   host: "127.0.0.1",
+  //   connectTimeout: 10000,
+  //   password: 0613
+  // })
 
   client.subscribe(subscriber_key);
   client.on('message', function(channel, message) {
