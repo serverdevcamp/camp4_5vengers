@@ -29,7 +29,9 @@ export const store = new Vuex.Store({
     freindList: [],
     sendRequestList: [],
     receiveRequestList: [],
-    homeList: []
+    homeList: [],
+    searchResultList: [],
+    searchEnterPressed: false
   },
   mutations: Object.assign({}, Mutations),
   getters: Object.assign({}, Getters, userInfoGetters, roomInfoGetters, roomListGetters, inRoomDetailsGetters, friendListGetters, requestListGetters, homeListGetters),

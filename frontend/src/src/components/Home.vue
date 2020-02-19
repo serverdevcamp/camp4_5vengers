@@ -12,7 +12,7 @@
                     </v-flex>
                     <v-flex text-md-right>
                         <img src="../assets/bell.png" class="icon-alarm" @click="requestDialogClick()"/>
-                        <img src="../assets/user.png" class="icon-friend"/>
+                        <img src="../assets/user.png" class="icon-friend" @click="sendDialogClick()"/>
                     </v-flex>
                 </v-flex>
                 <!-- 친구 검색 -->
@@ -159,6 +159,88 @@
                     </v-card>
             </v-dialog>
 
+             <!-- 친구 추가 다이얼로그 보기 -->
+             <v-dialog v-model="sendDialogClicked" max-width="400">
+                     <v-tabs sendDialogTab color="transparent" slider-color="black">
+                        <v-tab v-on:click="emailSearchClick" style="color:#000000; width: 50%;">이메일로 친구 추가</v-tab>
+                        <v-tab v-on:click="idSearchClick" style="color:#000000; width: 50%;">ID로 친구 추가</v-tab>
+                    </v-tabs>
+
+                    <!-- 이메일로 검색 탭이 눌렸을 때 -->
+                    <v-flex style="background-color: #ffffff;" class="profileCard" v-if="emailSearchClicked===1">
+                        <form @submit.prevent="emailSearch">
+                            <v-flex row wrap style="margin-left: 0.1%;">
+                                <!-- <input type="text" placeholder="이메일로 검색"> -->
+                                <v-text-field v-model="emailInput" placeholder="이메일로 검색" single-line clearable dense hide-details="auto" color="black"></v-text-field>
+                            </v-flex>
+                        </form>
+
+                        <!-- <v-flex v-if="emailInput===''" style="text-align: center; width: 100%; padding: 5%;">이메일로 친구를 추가할 수 있습니다.</v-flex> -->
+                        <!-- <v-flex v-else> -->
+                            <v-flex v-if="this.searchResultList.length>0">
+                                <v-flex v-for="(result, index) in this.searchResultList" :key="index" row style="margin-top:2%; margin-left: 2%;" md12>
+                                    <v-avatar contain p-0 m-0 wrap md2>
+                                        <v-img :src="(result.profile_front)" class="img-user" contain></v-img>
+                                    </v-avatar>
+                                    <v-flex md9 wrap p-0 style="margin-left: 2%; margin-top: 3%;">{{ result.user_nick }}</v-flex>
+
+                                    <v-flex v-if="result.status == 1">
+                                        <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 32.5%;" outlined disabled>이미 친구입니다.</v-btn>
+                                    </v-flex>
+                                    <v-flex v-else-if="result.status == 2">
+                                        <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 36%;" outlined>친구 요청</v-btn>
+                                    </v-flex>
+                                    <v-flex v-else>
+                                        <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 42%;" disabled outlined>나</v-btn>
+                                    </v-flex>
+
+                                </v-flex>
+                            </v-flex>
+
+                            <v-flex v-else style="text-align: center; width: 100%; padding: 5%;">검색 결과가 없습니다.</v-flex>
+
+                        <!-- </v-flex> -->
+
+                    </v-flex>
+
+                    <!-- ID로 검색 탭이 눌렸을 때 -->
+                    <v-flex style="background-color: #ffffff;" class="profileCard" v-if="idSearchClicked===1">
+                        <form @submit.prevent="idSearch">
+                            <v-flex row wrap style="margin-left: 0.1%;">
+                                <!-- <input type="text" placeholder="이메일로 검색"> -->
+                                <v-text-field v-model="idInput" placeholder="ID로 검색" single-line clearable dense hide-details="auto" color="black"></v-text-field>
+                            </v-flex>
+                        </form>
+
+                        <!-- <v-flex v-if="emailInput===''" style="text-align: center; width: 100%; padding: 5%;">이메일로 친구를 추가할 수 있습니다.</v-flex> -->
+                        <!-- <v-flex v-else> -->
+                            <v-flex v-if="this.searchResultList.length>0">
+                                <v-flex v-for="(result, index) in this.searchResultList" :key="index" row style="margin-left: 2%;" md12>
+                                    <v-avatar contain p-0 m-0 wrap md2>
+                                        <v-img :src="(result.profile_front)" class="img-user" contain></v-img>
+                                    </v-avatar>
+                                    <v-flex md9 wrap p-0 style="margin-left: 2%; margin-top: 3%;">{{ result.user_nick }}</v-flex>
+
+                                    <v-flex v-if="result.status == 1">
+                                        <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 32.5%;" outlined disabled>이미 친구입니다.</v-btn>
+                                    </v-flex>
+                                    <v-flex v-else-if="result.status == 2">
+                                        <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 36%;" outlined>친구 요청</v-btn>
+                                    </v-flex>
+                                    <v-flex v-else>
+                                        <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 42%;" disabled outlined>나</v-btn>
+                                    </v-flex>
+
+                                </v-flex>
+                            </v-flex>
+
+                            <v-flex v-else style="text-align: center; width: 100%; padding: 5%;">검색 결과가 없습니다.</v-flex>
+
+                        <!-- </v-flex> -->
+
+                    </v-flex>
+            </v-dialog>
+
         </v-layout>
     </v-container>
 </template>
@@ -176,10 +258,29 @@ export default {
       requestDialogClicked: false,
       sendRequestClicked: 1,
       receiveRequestClicked: 0,
-      acceptClicked: []
+      sendDialogClicked: false,
+      emailSearchClicked: 1,
+      idSearchClicked: 0,
+      acceptClicked: [],
+      emailInput: '',
+      idInput: ''
     }
   },
   methods: {
+    emailSearchClick () {
+      this.$store.dispatch('resetSearchResult')
+      this.idInput = ''
+
+      this.emailSearchClicked = 1
+      this.idSearchClicked = 0
+    },
+    idSearchClick () {
+      this.$store.dispatch('resetSearchResult')
+      this.emailInput = ''
+
+      this.emailSearchClicked = 0
+      this.idSearchClicked = 1
+    },
     sendRequestClick () {
       this.sendRequestClicked = 1
       this.receiveRequestClicked = 0
@@ -199,6 +300,23 @@ export default {
       this.requestDialogClicked = true
       this.$store.dispatch('getReceiveRequestList', { accessToken: this.userToken })
       this.$store.dispatch('getSendRequestList', { accessToken: this.userToken })
+    },
+    sendDialogClick () {
+      this.sendDialogClicked = true
+    },
+    emailSearch () {
+      const object = {
+        accessToken: this.userToken,
+        input: this.emailInput
+      }
+      this.$store.dispatch('getEmailSearchResult', object)
+    },
+    idSearch () {
+      const object = {
+        accessToken: this.userToken,
+        input: this.idInput
+      }
+      this.$store.dispatch('getIdSearchResult', object)
     }
   },
   computed: {
@@ -210,7 +328,8 @@ export default {
       receiveRequestList: 'receiveRequestList',
       userProfileFront: 'profileFrontInfo',
       userProfileBack: 'profileBackInfo',
-      friendList: 'homeList'
+      friendList: 'homeList',
+      searchResultList: 'searchResultList'
     })
   },
   created: function () {
@@ -220,12 +339,21 @@ export default {
     this.$store.dispatch('getSendRequestList', object)
     this.$store.dispatch('getReceiveRequestList', object)
     this.$store.dispatch('getHomeList', object)
-    console.log('friend!!:: ', this.friendList)
+
+    this.$store.dispatch('resetSearchResult')
   }
 }
 </script>
 
 <style scoped>
+input[type=text] {
+  width: 100%;
+  height: 40px;
+  margin-left: 5%;
+  margin-top: 1%;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
 .con {
     width: 100%;
     height: 100%;
@@ -290,6 +418,9 @@ export default {
   width: 80%;
 }
 .requestDialogTab {
+    text-align: center;
+}
+.sendDialogTab {
     text-align: center;
 }
 </style>
