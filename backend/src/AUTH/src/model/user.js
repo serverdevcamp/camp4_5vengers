@@ -59,12 +59,31 @@ module.exports = {
                 let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
                 let verifyCode = createKeyVerify(); // 이메일 인증코드 생성
 
-                let insertUserQuery =
-                    `
+                let insertUserQuery = `
                 INSERT INTO user
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?);
-                `;
-                let insertUserResult = await db.queryParam_Parse(insertUserQuery, [null, name, id, email, pwd, nick, salt, now, now, null, 0, JSON.stringify(tempProfile), null, verifyCode, null]);
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?); `;
+                let insertUserResult = await db.queryParam_Parse(insertUserQuery, [null, name, id, email, pwd, nick, salt, now, now, null, 0, JSON.stringify(tempProfile), '{"friends":[]}', verifyCode, null]);
+
+                let selectInviteQuery = `
+                SELECT *
+                FROM friends_invite
+                WHERE email = ? `;
+                let selectedInvite = await db.queryParam_Parse(selectInviteQuery, [email]);
+
+                let insertRequestQuery = `
+                INSERT INTO friends_request
+                VALUES(?,?,?,?) `;
+
+                if (selectedInvite.length != 0) {
+                    for (var i in selectedInvite) {
+                        await db.queryParam_Parse(insertRequestQuery, [null, insertUserResult.insertId, selectedInvite[i].from, 0])
+                    }
+                }
+
+                let deleteInviteQuery = `
+                DELETE FROM friends_invite
+                WHERE email = ? `;
+                let deletedInvite = await db.queryParam_Parse(deleteInviteQuery, [email]);
 
                 // 이메일 전송 옵션 설정
                 let mailOptions = {
@@ -201,6 +220,7 @@ module.exports = {
                     let payload = {
                         userIdx: checkRightTokenResult[0].idx,
                         userId: checkRightTokenResult[0].id,
+                        userName: checkRightTokenResult[0].name,
                         userEmail: checkRightTokenResult[0].email
                     };
                     let tempAccessToken = await jwtCreate.createAccessToken(payload);

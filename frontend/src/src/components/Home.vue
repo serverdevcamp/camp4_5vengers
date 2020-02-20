@@ -188,7 +188,10 @@
                                         <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 32.5%;" outlined disabled>이미 친구입니다.</v-btn>
                                     </v-flex>
                                     <v-flex v-else-if="result.status == 2">
-                                        <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 36%;" outlined>친구 요청</v-btn>
+                                        <v-btn id="requestBtn" md1 @click="sendRequest(index)" style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 36%;" outlined>친구 요청</v-btn>
+                                    </v-flex>
+                                    <v-flex v-else-if="result.status == 3">
+                                        <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 37%;" disabled="true" outlined>친구 요청</v-btn>
                                     </v-flex>
                                     <v-flex v-else>
                                         <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 42%;" disabled outlined>나</v-btn>
@@ -197,7 +200,13 @@
                                 </v-flex>
                             </v-flex>
 
-                            <v-flex v-else style="text-align: center; width: 100%; padding: 5%;">검색 결과가 없습니다.</v-flex>
+                            <v-flex v-else style="text-align: center; width: 100%; padding: 5%;">
+                                <v-flex v-if="emailInput===''">검색 결과가 없습니다.</v-flex>
+                                <v-flex v-else>
+                                    검색 결과가 없습니다. 초대 이메일을 전송해볼까요?
+                                    <v-btn md1 @click="inviteFriend(emailInput)" style="margin-bottom: 1.5%; margin-top: 7%; margin-left: 2%;" outlined>친구 초대</v-btn>
+                                </v-flex>
+                            </v-flex>
 
                         <!-- </v-flex> -->
 
@@ -212,26 +221,34 @@
                             </v-flex>
                         </form>
 
-                        <!-- <v-flex v-if="emailInput===''" style="text-align: center; width: 100%; padding: 5%;">이메일로 친구를 추가할 수 있습니다.</v-flex> -->
+                        <!-- <v-flex v-if="emailInput===''" style="text-align: center; width: 100%; padding: 5%;">ID로 친구를 추가할 수 있습니다.</v-flex> -->
                         <!-- <v-flex v-else> -->
                             <v-flex v-if="this.searchResultList.length>0">
-                                <v-flex v-for="(result, index) in this.searchResultList" :key="index" row style="margin-left: 2%;" md12>
+                                <!-- <v-flex v-if="emailInput != sendedInput" style="text-align: center; width: 100%; padding: 5%;">ID로 친구를 추가할 수 있습니다.</v-flex>
+                                <v-flex v-else> -->
+                                <v-flex v-for="(result, index) in this.searchResultList" :key="index" row style="margin-left: 2%; margin-top: 2%;" md12>
                                     <v-avatar contain p-0 m-0 wrap md2>
                                         <v-img :src="(result.profile_front)" class="img-user" contain></v-img>
                                     </v-avatar>
-                                    <v-flex md9 wrap p-0 style="margin-left: 2%; margin-top: 3%;">{{ result.user_nick }}</v-flex>
+                                    <v-flex md9 wrap p-0 style="margin-left: 2%; margin-top: 3%;"> {{ result.user_nick }} </v-flex>
 
                                     <v-flex v-if="result.status == 1">
                                         <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 32.5%;" outlined disabled>이미 친구입니다.</v-btn>
                                     </v-flex>
                                     <v-flex v-else-if="result.status == 2">
-                                        <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 36%;" outlined>친구 요청</v-btn>
+                                        <v-btn class="sendRequestBtn" md1 @click="sendRequest(result.user_idx)" style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 36%;" outlined>친구 요청</v-btn>
+                                    </v-flex>
+                                    <v-flex v-else-if="result.status == 3">
+                                        <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 37%;" disabled outlined>친구 요청</v-btn>
                                     </v-flex>
                                     <v-flex v-else>
                                         <v-btn md1 style="margin-bottom: 1.5%; margin-top: 1.5%; margin-left: 42%;" disabled outlined>나</v-btn>
                                     </v-flex>
 
+                                <!-- </v-flex> -->
                                 </v-flex>
+                                <!-- <v-flex v-else style="text-align: center; width: 100%; padding: 5%;">검색 결과가 없습니다.</v-flex> -->
+
                             </v-flex>
 
                             <v-flex v-else style="text-align: center; width: 100%; padding: 5%;">검색 결과가 없습니다.</v-flex>
@@ -295,6 +312,7 @@ export default {
         from: this.receiveRequestList[index].sender
       }
       this.$store.dispatch('acceptRequest', object)
+      location.reload('/')
     },
     requestDialogClick () {
       this.requestDialogClicked = true
@@ -305,11 +323,16 @@ export default {
       this.sendDialogClicked = true
     },
     emailSearch () {
-      const object = {
-        accessToken: this.userToken,
-        input: this.emailInput
+      var regExp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i
+      if (regExp.test(this.emailInput)) {
+        const object = {
+          accessToken: this.userToken,
+          input: this.emailInput
+        }
+        this.$store.dispatch('getEmailSearchResult', object)
+      } else {
+        alert('이메일 형식이 아닙니다')
       }
-      this.$store.dispatch('getEmailSearchResult', object)
     },
     idSearch () {
       const object = {
@@ -317,7 +340,34 @@ export default {
         input: this.idInput
       }
       this.$store.dispatch('getIdSearchResult', object)
+    },
+    sendRequest (friendIdx) {
+      const object = {
+        accessToken: this.userToken,
+        idx: friendIdx
+      }
+      this.$store.dispatch('sendFriendRequest', object)
+    //   var el = document.getElementsByClassName('sendRequestBtn')
+    //   el.disabled = false
+    },
+    inviteFriend (friendEmail) {
+      var regExp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i
+      if (regExp.test(this.emailInput)) {
+        const object = {
+          accessToken: this.userToken,
+          email: friendEmail
+        }
+        this.$store.dispatch('inviteFriend', object)
+        // var x = document.getElementById('requestBtn')
+        // x.style.property.disabled = true
+      } else {
+        alert('이메일 형식이 아닙니다')
+      }
+    },
+    sendRequestBtnClick () {
+      console.log('send request btn clicked')
     }
+
   },
   computed: {
     ...mapGetters({

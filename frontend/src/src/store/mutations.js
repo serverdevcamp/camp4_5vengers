@@ -110,5 +110,11 @@ export const Mutations = {
   },
   resetSearchResult (state, payload) {
     state.searchResultList = []
+  },
+  sendFriendRequestSuccess (state, payload) {
+
+  },
+  inviteFriendSuccess (state, payload) {
+
   }
 }
