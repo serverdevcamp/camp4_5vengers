@@ -20,7 +20,7 @@ var redis_address = process.env.REDIS_ADDRESS || 'redis://10.99.13.29:6379';
 var redis = new Redis(redis_address);
 
 var redis_subscribers = {};
-var channel_history_max = 200;
+var channel_history_max = 1000;
 const db = require('./module/pool');
 
 app.set('views', path.join(__dirname, 'views'));
