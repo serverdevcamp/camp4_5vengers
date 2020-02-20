@@ -15,7 +15,7 @@ export const Actions = {
     })
   },
   signIn ({ commit }, payload) {
-    axios.post('http://localhost:3000/user/signIn', payload).then(response => {
+    axios.post('http://13.125.153.37:3000/user/signIn', payload).then(response => {
       if (response.data.status === 200) {
         commit('signInSuccess', response.data)
       } else if (response.data.status === 336) {
@@ -100,7 +100,7 @@ export const Actions = {
     })
   },
   settings ({ commit }, payload) {
-    axios.post('http://13.125.153.37:3001/room/name', payload).then(response => {
+    axios.post('http://localhost:3001/room/name', payload).then(response => {
       console.log('응답~~~: ', response)
       if (response.status === 200) commit('settingsSuccess', response.data)
     })

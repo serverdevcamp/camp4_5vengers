@@ -18,23 +18,10 @@ var port = process.env.PORT || 3002;
 var Redis = require('ioredis');
 var redis_address = process.env.REDIS_ADDRESS || 'redis://10.99.13.29:6379';
 var redis = new Redis(redis_address);
-// var redis = new Redis({
-//   port: 6379,
-//   host: "127.0.0.1",
-//   connectTimeout: 10000,
-//   password: 0613
-// })
 
 var redis_subscribers = {};
 var channel_history_max = 200;
 const db = require('./module/pool');
-
-// const corsOptions = {
-//   origin: 'http://localhost:8080', // 허락하고자 하는 요청 주소
-//   credentials: true, // true로 하면 설정한 내용을 response 헤더에 추가 해줍니다.
-// };
-
-// app.use(cors(corsOptions)); 
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -54,12 +41,6 @@ app.use('/', indexRouter);
 function add_redis_subscriber(subscriber_key) {
   console.log("???");
   var client = new Redis(redis_address);
-  // var client = new Redis({
-  //   port: 6379,
-  //   host: "127.0.0.1",
-  //   connectTimeout: 10000,
-  //   password: 0613
-  // })
 
   client.subscribe(subscriber_key);
   client.on('message', function(channel, message) {
@@ -69,41 +50,10 @@ function add_redis_subscriber(subscriber_key) {
   redis_subscribers[subscriber_key] = client;
 }
 add_redis_subscriber('messages');
-// add_redis_subscriber('member_add');
-// add_redis_subscriber('member_delete');
 
 io.on('connection', function(socket) {//여기에 함수 인자로 room_idx를 받아야한다.
-  // var room_idx = socket.handshake.query.roomIdx;
-
-  // var get_members = redis.hgetall('members').then(function(redis_members) {
-  //     console.log("2");
-  //     var members = {};
-  //     for (var key in redis_members) {
-  //         members[key] = JSON.parse(redis_members[key]);
-  //     }
-  //     return members;
-  // });
-
-  // var initialize_member = get_members.then(function(members) {//톡방에 메세지를 남긴 사람들
-  //     console.log("3");
-  //     if (members[room_idx]) {
-  //         return members[room_idx];
-  //     }
-
-  //     var username = faker.fake("{{name.firstName}} {{name.lastName}}");
-  //     var member = {
-  //         room_idx: room_idx,
-  //         nick: username,
-  //         front_img: "//api.adorable.io/avatars/30/" + username + '.png'
-  //     };
-
-  //     return redis.hset('members', room_idx, JSON.stringify(member)).then(function() {
-  //         return member;
-  //     });
-  // });
 
   var get_messages = redis.zrange('messages', -1 * channel_history_max, -1).then(function(result) {
-      console.log("4");
       return result.map(function(x) {
           return JSON.parse(x);
       });
@@ -112,15 +62,9 @@ io.on('connection', function(socket) {//여기에 함수 인자로 room_idx를 �
   Promise.all([ get_messages]).then(function(values) {
       var temp = []
       temp.push(socket.id);
-      console.log("1");
-      // var members = values[0];
-      // var member = values[0];
       var messages = values[0];
-
-      // io.emit('member_history', members);
+      
       io.emit('message_history', messages);
-
-      // redis.publish('member_add', JSON.stringify(member));
 
       socket.on('send', async function(info) {
           var date = moment.now();
@@ -156,18 +100,15 @@ io.on('connection', function(socket) {//여기에 함수 인자로 room_idx를 �
           const insertChatResult = await db.queryParam_Parse(insertChatQuery , [String(date), String(date)+String(info.userIdx), info.room_idx, (info.mem_count-getReadResult.length), JSON.stringify(object), info.message]);
 
           io.to(info.room_idx).emit('readSend', (info.mem_count-getReadResult.length));
-          // socket.broadcast.to(info.room_idx).emit('readSend', (info.mem_count-getReadResult.length));
       });
 
       //사용자가 읽은 메세지들 확인 후 안 읽었으면 읽은 메세지 수 감소
       //메시지의 regist_dt가 사용자의 offline_dt보다 크다면, 
       socket.on('read', async function(info) {        
         socket.join(info.roomIdx)
-        console.log('찍어봤어~~~~', socket.adapter.rooms[info.roomIdx])
         //room_person의 last에 저장된 마지막으로 읽은 메시지 idx+1부터 그 채팅방에 있는 모든 메세지의 reader에 사용자를 추가한다.
         const selectLastQuery = 'SELECT last_msg_idx FROM room_person WHERE room_idx = ? AND user_idx = ?';
         const selectLastResult = await db.queryParam_Parse(selectLastQuery , [info.roomIdx, info.userIdx]);
-        console.log("last : ", selectLastResult[0]['last_msg_idx']);
         
         //last+1부터 모든 메세지의 reader에 사용자 idx push하기(mysql)
         const updateReaderQuery = 'UPDATE chatting SET regist_count = regist_count-1 WHERE room_idx = ? AND idx > ?';
@@ -180,21 +121,11 @@ io.on('connection', function(socket) {//여기에 함수 인자로 room_idx를 �
         for(i=0; i<selectCountResult.length; i++){
             list.push(selectCountResult[i]['regist_count']);
         }
-        // io.sockets.in(info.roomIdx).emit('readCount', list);
-        // socket.broadcast.to(info.roomIdx).emit('readtogether');
-        // io.sockets.in(info.roomIdx).emit('readtogether')
+
         //현재 방에 있에 연결되어 있는 소켓들에게 emit을 해준다.(동시 접속)
         io.to(info.roomIdx).emit('readCount', list);
-        // socket.emit('readCount', list);
-        // socket.broadcast.to(info.roomIdx).emit('readCount', list);
-        // io.sockets.emit('readCount', list)
-        // socket.leave(info.roomIdx)
       });
 
-      io.on('disconnect', function() {
-          // redis.hdel('members', room_idx);
-          // redis.publish('member_delete', JSON.stringify(room_idx));
-      });
   }).catch(function(reason) {
       console.log('ERROR: ' + reason);
   });
