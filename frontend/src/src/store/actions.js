@@ -42,15 +42,6 @@ export const Actions = {
   },
   home ({ commit }, payload) {
   },
-  sendMsg ({ commit }, payload) {
-    console.log(payload)
-    axios.post('http://localhost:3001/example', payload).then(response => {
-      console.log('in')
-      console.log(response.status)
-      if (response.status === 200) commit('sendMsgSuccess', response.data)
-      else commit('sendMsgFail', response.data)
-    })
-  },
   changeRoomIdx ({ commit }, payload) {
     console.log(payload)
     axios.post('http://localhost:3001/room/offline', payload).then(response => {

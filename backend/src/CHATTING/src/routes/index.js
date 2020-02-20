@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 
-router.use('/example', require('./example'));
 router.use('/room', require('./room'));
 router.use('/chat', require('./chat'));
 

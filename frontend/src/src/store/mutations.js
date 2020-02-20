@@ -29,16 +29,6 @@ export const Mutations = {
   authSuccess (state, payload) {
     router.push('/home')
   },
-  sendMsgSuccess (state, payload) {
-    console.log(state)
-    console.log(payload)
-    console.log('sendMsgSuccess!!')
-  },
-  sendMsgFail (state, payload) {
-    console.log(state)
-    console.log(payload)
-    console.log('sendMsgFail!!')
-  },
   changeRoomIdxSuccess (state, payload) {
     state.inRoomDetails = 0
     console.log(payload)
