@@ -44,7 +44,7 @@ export const Actions = {
   },
   sendMsg ({ commit }, payload) {
     console.log(payload)
-    axios.post('http://13.125.153.37:3001/example', payload).then(response => {
+    axios.post('http://localhost:3001/example', payload).then(response => {
       console.log('in')
       console.log(response.status)
       if (response.status === 200) commit('sendMsgSuccess', response.data)
@@ -53,7 +53,7 @@ export const Actions = {
   },
   changeRoomIdx ({ commit }, payload) {
     console.log(payload)
-    axios.post('http://13.125.153.37:3001/room/offline', payload).then(response => {
+    axios.post('http://localhost:3001/room/offline', payload).then(response => {
       console.log('in')
       if (response.status === 200) commit('changeRoomIdxSuccess', response.data)
       else commit('changeRoomIdxFail', response.data)
@@ -61,7 +61,7 @@ export const Actions = {
   },
   changeOnlineIdx ({ commit }, payload) {
     console.log(payload)
-    axios.post('http://13.125.153.37:3001/room/online', payload).then(response => {
+    axios.post('http://localhost:3001/room/online', payload).then(response => {
       console.log('in_2')
       if (response.status === 200) commit('changeOnlineSuccess', response.data)
       else commit('changeOnlineFail', response.data)
@@ -69,7 +69,7 @@ export const Actions = {
   },
   getRoomInfo ({ commit }, payload) {
     console.log(payload)
-    axios.post('http://13.125.153.37:3001/chat/default', payload).then(response => {
+    axios.post('http://localhost:3001/chat/default', payload).then(response => {
       if (response.status === 200) commit('getRoomInfoSuccess', response.data)
       else commit('getRoomInfoFail', response.data)
     })

@@ -29,12 +29,12 @@ var redis_subscribers = {};
 var channel_history_max = 200;
 const db = require('./module/pool');
 
-const corsOptions = {
-  origin: 'http://localhost:8080', // 허락하고자 하는 요청 주소
-  credentials: true, // true로 하면 설정한 내용을 response 헤더에 추가 해줍니다.
-};
+// const corsOptions = {
+//   origin: 'http://localhost:8080', // 허락하고자 하는 요청 주소
+//   credentials: true, // true로 하면 설정한 내용을 response 헤더에 추가 해줍니다.
+// };
 
-app.use(cors(corsOptions)); 
+// app.use(cors(corsOptions)); 
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -69,39 +69,38 @@ function add_redis_subscriber(subscriber_key) {
   redis_subscribers[subscriber_key] = client;
 }
 add_redis_subscriber('messages');
-add_redis_subscriber('member_add');
-add_redis_subscriber('member_delete');
+// add_redis_subscriber('member_add');
+// add_redis_subscriber('member_delete');
 
 io.on('connection', function(socket) {//여기에 함수 인자로 room_idx를 받아야한다.
-  var room_idx = socket.handshake.query.roomIdx;
+  // var room_idx = socket.handshake.query.roomIdx;
 
-  var get_members = redis.hgetall('members').then(function(redis_members) {
-      console.log("2");
-      var members = {};
-      for (var key in redis_members) {
-        //   console.log(key);
-          members[key] = JSON.parse(redis_members[key]);
-      }
-      return members;
-  });
+  // var get_members = redis.hgetall('members').then(function(redis_members) {
+  //     console.log("2");
+  //     var members = {};
+  //     for (var key in redis_members) {
+  //         members[key] = JSON.parse(redis_members[key]);
+  //     }
+  //     return members;
+  // });
 
-  var initialize_member = get_members.then(function(members) {//톡방에 메세지를 남긴 사람들
-      console.log("3");
-      if (members[room_idx]) {
-          return members[room_idx];
-      }
+  // var initialize_member = get_members.then(function(members) {//톡방에 메세지를 남긴 사람들
+  //     console.log("3");
+  //     if (members[room_idx]) {
+  //         return members[room_idx];
+  //     }
 
-      var username = faker.fake("{{name.firstName}} {{name.lastName}}");
-      var member = {
-          room_idx: room_idx,
-          nick: username,
-          front_img: "//api.adorable.io/avatars/30/" + username + '.png'
-      };
+  //     var username = faker.fake("{{name.firstName}} {{name.lastName}}");
+  //     var member = {
+  //         room_idx: room_idx,
+  //         nick: username,
+  //         front_img: "//api.adorable.io/avatars/30/" + username + '.png'
+  //     };
 
-      return redis.hset('members', room_idx, JSON.stringify(member)).then(function() {
-          return member;
-      });
-  });
+  //     return redis.hset('members', room_idx, JSON.stringify(member)).then(function() {
+  //         return member;
+  //     });
+  // });
 
   var get_messages = redis.zrange('messages', -1 * channel_history_max, -1).then(function(result) {
       console.log("4");
@@ -110,16 +109,18 @@ io.on('connection', function(socket) {//여기에 함수 인자로 room_idx를 �
       });
   });
 
-  Promise.all([get_members, initialize_member, get_messages]).then(function(values) {
+  Promise.all([ get_messages]).then(function(values) {
+      var temp = []
+      temp.push(socket.id);
       console.log("1");
-      var members = values[0];
-      var member = values[1];
-      var messages = values[2];
+      // var members = values[0];
+      // var member = values[0];
+      var messages = values[0];
 
-      io.emit('member_history', members);
+      // io.emit('member_history', members);
       io.emit('message_history', messages);
 
-      redis.publish('member_add', JSON.stringify(member));
+      // redis.publish('member_add', JSON.stringify(member));
 
       socket.on('send', async function(info) {
           var date = moment.now();
@@ -150,32 +151,25 @@ io.on('connection', function(socket) {//여기에 함수 인자로 room_idx를 �
           redis.zadd('messages', date, message);
           redis.publish('messages', message);
 
-          //chatting 테이블에 insert해주기(regist_count->(info.mem_count-getReadResult[0]['COUNT(*)'])
+          //chatting 테이블에 insert해주기
           const insertChatQuery = 'INSERT INTO chatting (regist_dt, msg_idx, room_idx, regist_count, reader, message) VALUES (?, ?, ?, ?, ?, ?)'
           const insertChatResult = await db.queryParam_Parse(insertChatQuery , [String(date), String(date)+String(info.userIdx), info.room_idx, (info.mem_count-getReadResult.length), JSON.stringify(object), info.message]);
 
-        //   //읽은 메세지 수
-        //   const selectCountQuery = 'SELECT regist_count FROM chatting WHERE room_idx = ?';
-        //   const selectCountResult = await db.queryParam_Parse(selectCountQuery ,[info.roomIdx]);
-        //   var list = []
-        //     for(i=0; i<selectCountResult.length; i++){
-        //         list.push(selectCountResult[i]['regist_count']);
-        //     }
-        //   socket.emit('readCount', list);
-          socket.emit('readSend', (info.mem_count-getReadResult.length));
+          io.to(info.room_idx).emit('readSend', (info.mem_count-getReadResult.length));
+          // socket.broadcast.to(info.room_idx).emit('readSend', (info.mem_count-getReadResult.length));
       });
 
       //사용자가 읽은 메세지들 확인 후 안 읽었으면 읽은 메세지 수 감소
       //메시지의 regist_dt가 사용자의 offline_dt보다 크다면, 
-      socket.on('read', async function(info) {
-          //room_person의 last에 저장된 마지막으로 읽은 메시지 idx+1부터 그 채팅방에 있는 모든 메세지의 reader에 사용자를 추가한다.
-          //그리고 그 각각의 메세지의 regist_count--  
+      socket.on('read', async function(info) {        
+        socket.join(info.roomIdx)
+        console.log('찍어봤어~~~~', socket.adapter.rooms[info.roomIdx])
+        //room_person의 last에 저장된 마지막으로 읽은 메시지 idx+1부터 그 채팅방에 있는 모든 메세지의 reader에 사용자를 추가한다.
         const selectLastQuery = 'SELECT last_msg_idx FROM room_person WHERE room_idx = ? AND user_idx = ?';
         const selectLastResult = await db.queryParam_Parse(selectLastQuery , [info.roomIdx, info.userIdx]);
         console.log("last : ", selectLastResult[0]['last_msg_idx']);
         
         //last+1부터 모든 메세지의 reader에 사용자 idx push하기(mysql)
-        //그리고 그 각각의 메세지의 regist_count--
         const updateReaderQuery = 'UPDATE chatting SET regist_count = regist_count-1 WHERE room_idx = ? AND idx > ?';
         const updateReaderResult = await db.queryParam_Parse(updateReaderQuery, [info.roomIdx, selectLastResult[0]['last_msg_idx']]);
 
@@ -186,23 +180,20 @@ io.on('connection', function(socket) {//여기에 함수 인자로 room_idx를 �
         for(i=0; i<selectCountResult.length; i++){
             list.push(selectCountResult[i]['regist_count']);
         }
-        socket.emit('readCount', list);
+        // io.sockets.in(info.roomIdx).emit('readCount', list);
+        // socket.broadcast.to(info.roomIdx).emit('readtogether');
+        // io.sockets.in(info.roomIdx).emit('readtogether')
+        //현재 방에 있에 연결되어 있는 소켓들에게 emit을 해준다.(동시 접속)
+        io.to(info.roomIdx).emit('readCount', list);
+        // socket.emit('readCount', list);
+        // socket.broadcast.to(info.roomIdx).emit('readCount', list);
+        // io.sockets.emit('readCount', list)
+        // socket.leave(info.roomIdx)
       });
 
-    //   socket.on('read_next', async function(info) {
-    //     //읽은 메세지 수
-    //     const selectCountQuery = 'SELECT regist_count FROM chatting WHERE room_idx = ?';
-    //     const selectCountResult = await db.queryParam_Parse(selectCountQuery ,[info.roomIdx]);
-    //     var list = []
-    //     for(i=0; i<selectCountResult.length; i++){
-    //         list.push(selectCountResult[i]['regist_count']);
-    //     }
-    //     socket.emit('readCount', list);
-    //   });
-
-      socket.on('disconnect', function() {
-          redis.hdel('members', room_idx);
-          redis.publish('member_delete', JSON.stringify(room_idx));
+      io.on('disconnect', function() {
+          // redis.hdel('members', room_idx);
+          // redis.publish('member_delete', JSON.stringify(room_idx));
       });
   }).catch(function(reason) {
       console.log('ERROR: ' + reason);

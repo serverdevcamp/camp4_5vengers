@@ -92,7 +92,7 @@
 <script>
 import io from 'socket.io-client'
 import moment from 'moment'
-import Vue from 'vue'
+// import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -103,11 +103,12 @@ export default {
       mem_count: '',
       message: '',
       messages: [], // 내가 아닌 타인이 보낸 메세지
-      members: {},
+      //   members: {},
       socket: null,
       redis_idx: '',
       readCount: [],
-      readCount_idx: -1
+      readCount_idx: -1,
+      check_temp: 0
     }
   },
   methods: {
@@ -138,24 +139,9 @@ export default {
       return moment(date).format('h:mm:ss a')
     },
     socketConnect () {
-      console.log('들어왔드아~~~~~~~~~~~~~~~~~~~~~')
       // 소켓 연결
-      //   var room = ({
-      //     room_idx: 0
-      //   })
-      //   this.socket.emit('room', room)
       this.socket.on('messages', function (message) {
-        // console.log(message)
         this.messages.push(message)
-        // console.log(this.messages.length - 1)
-      }.bind(this))
-
-      this.socket.on('member_add', function (member) {
-        Vue.set(this.members, member.socket, member)
-      }.bind(this))
-
-      this.socket.on('member_delete', function (socketId) {
-        Vue.delete(this.members, socketId)
       }.bind(this))
 
       this.socket.on('message_history', function (messages) {
@@ -170,29 +156,20 @@ export default {
         this.messages = temp
       }.bind(this))
 
-      this.socket.on('member_history', function (members) {
-        this.members = members
-      }.bind(this))
-
       var temp = []
       this.socket.on('readCount', function (readCount) {
-        console.log(readCount)
-        var i = 0
-        for (i = 0; i < readCount.length; i++) {
-          temp.push(readCount[i])
-        }
-      })
-      //   this.$store.readCount = temp
-      this.readCount = temp
+        this.readCount = readCount
+        temp = this.readCount
+      }.bind(this))
 
       this.socket.on('readSend', function (readSend) {
         temp.push(readSend)
-      })
-      this.readCount = temp
+        this.readCount = temp
+      }.bind(this))
     }
   },
   mounted: function () {
-    this.socket = io.connect('http://13.125.153.37:3002', { transports: ['websocket'], query: 'roomIdx=2' })// 여기에 room_idx를 전달해주기
+    this.socket = io.connect('http://localhost:3002', { transports: ['websocket'], query: 'roomIdx=2' })// 여기에 room_idx를 전달해주기
     // 일단 들어오면, db online_dt update 하기 && 읽은 메세지 수 update하기(만약 이 유저가 이미 읽은 메세지가 있으면 그대로 두고 안 읽은 메세지가 있으면 읽은 메세지 수 감소)
     // 채팅방 이름, 채팅방 인원수 불러오기
     // this.$store.room_idx = this.roomIdx
@@ -205,7 +182,6 @@ export default {
     })
     // this.$store.dispatch('readCount', info)
     this.socket.emit('read', info)
-    this.socket.emit()
     const object = {
       roomIdx: this.roomIdx,
       userIdx: this.userIdx
@@ -225,8 +201,8 @@ export default {
       count: 'memCount',
       userIdx: 'idxInfo',
       roomIdx: 'roomIdx'
-    //   inRoomDetails: 'inRoomDetails'
-    //   readCount: 'readCount'
+      //   inRoomDetails: 'inRoomDetails'
+      //   readCount: 'readCount'
     })
   }
 }
