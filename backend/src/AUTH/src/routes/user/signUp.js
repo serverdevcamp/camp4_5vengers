@@ -3,10 +3,9 @@ var router = express.Router();
 const util = require('../../module/utils');
 const statusCode = require('../../module/statusCode');
 const User = require('../../model/user');
-// const encrypt = require('../../module/encryption');
 
 
-router.post('/', async(req, res) => {
+router.post('/', async (req, res) => {
     try {
         const { id, name, email, pwd, nick } = req.body;
         User.signUp({ id, name, email, pwd, nick })
