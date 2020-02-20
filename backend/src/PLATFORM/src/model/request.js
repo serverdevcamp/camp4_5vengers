@@ -102,7 +102,6 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             let userIdx;
             let dataArray = []; // client에게 보내줄 data: []
-            let tempArray = [];
 
             let getUserIdxResult = await jwtVerify.verifyAccessToken(accessToken);
             userIdx = getUserIdxResult.userIdx;
@@ -114,23 +113,34 @@ module.exports = {
             WHERE friends_request.to = ? and friends_request.from = ? `;
             let updatedStatus = await db.queryParam_Parse(updateStatusQuery, [userIdx, from]);
 
-            // user 테이블의 friends 칼럼 가져와서 from 추가
             let selectFriendsQuery = `
             SELECT friends
             FROM user
             WHERE idx = ? `;
-            let selectedFriends = await db.queryParam_Parse(selectFriendsQuery, [userIdx]);
-            tempArray = JSON.parse(selectedFriends[0].friends).friends
-            tempArray.push(parseInt(from))
-            let dataObject = {};
-            dataObject.friends = tempArray;
 
-            // user 테이블의 friends 칼럼 업데이트
             let updateUserFriendsQuery = `
             UPDATE user 
             SET friends = ? 
             WHERE idx = ? `;
-            let updatedUserFriends = await db.queryParam_Parse(updateUserFriendsQuery, [JSON.stringify(dataObject), userIdx]);
+
+            // user 테이블의 friends 칼럼 가져와서 from 추가, friends 칼럼 업데이트
+            let selectedFriendsTo = await db.queryParam_Parse(selectFriendsQuery, [userIdx]);
+            let tempArray = [];
+            tempArray = JSON.parse(selectedFriendsTo[0].friends).friends
+            tempArray.push(parseInt(from))
+            let toObject = {};
+            toObject.friends = tempArray;
+            let updatedUserFriendsTo = await db.queryParam_Parse(updateUserFriendsQuery, [JSON.stringify(toObject), userIdx]);
+
+            // 상대방의 friends 칼럼도 업데이트
+            let selectedFriendsFrom = await db.queryParam_Parse(selectFriendsQuery, [from]);
+            let tempArray2 = [];
+            tempArray2 = JSON.parse(selectedFriendsFrom[0].friends).friends;
+            tempArray2.push(parseInt(userIdx));
+            let fromObject = {};
+            fromObject.friends = tempArray2;
+            let updatedUserFriendsFrom = await db.queryParam_Parse(updateUserFriendsQuery, [JSON.stringify(fromObject), from])
+
 
             // 업데이트 된 받은 요청 리스트 보내주기
             let selectListQuery = `
@@ -288,6 +298,19 @@ module.exports = {
             userIdx = getUserInfoResult.userIdx;
             userName = getUserInfoResult.userName;
 
+            let selectInviteQuery = `
+            SELECT *
+            FROM friends_invite
+            WHERE friends_invite.email = ? and friends_invite.from = ?`;
+            let selectedInvite = await db.queryParam_Parse(selectInviteQuery, [email, userIdx]);
+
+            if (selectedInvite.length == 0) { // 초대한 적이 없다면 insert, 있으면 insert안하고 메일만 보내주기
+                let insertInviteQuery = `
+                INSERT INTO friends_invite
+                VALUES(?,?,?) `;
+                let insertedInvite = await db.queryParam_Parse(insertInviteQuery, [null, userIdx, email])
+            }
+
             // 이메일 전송 옵션 설정
             let mailOptions = {
                 from: secretEmail.user,
@@ -303,15 +326,11 @@ module.exports = {
                 transporter.close();
             });
 
-            let insertInviteQuery = `
-            INSERT INTO friends_invite
-            VALUES(?,?,?) `;
-            let insertedInvite = await db.queryParam_Parse(insertInviteQuery, [null, userIdx, email])
-
             resolve({
                 code: 200,
                 json: util.successTrueNoData(statusCode.OK, "초대 이메일 전송 성공")
             });
+
         });
     }
 };

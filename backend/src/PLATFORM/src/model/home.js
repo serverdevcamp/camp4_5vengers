@@ -22,7 +22,7 @@ module.exports = {
 
             let selectedFriends = await db.queryParam_Parse(selectFriendsQuery, [userIdx]);
 
-            if (selectedFriends[0].friends == '' || selectedFriends[0].friends == null) {
+            if (JSON.parse(selectedFriends[0].friends).friends.length == 0) {
                 resolve({
                     code: 200,
                     json: util.successTrue(statusCode.OK, "홈 친구 목록 조회 성공", [])
