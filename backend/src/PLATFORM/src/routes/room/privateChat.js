@@ -6,9 +6,9 @@ const Room = require('../../model/room');
 
 router.post('/', async (req, res) => {
     try {
-        const { accessToken, members, roomName } = req.body;
+        const { accessToken, friendIdx } = req.body;
 
-        Room.create({ accessToken, members, roomName })
+        Room.privateChat({ accessToken, friendIdx })
             .then(({ code, json }) => res.status(code).send(json))
             .catch(err => {
                 console.log(err);

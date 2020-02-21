@@ -2,13 +2,13 @@ var express = require('express');
 var router = express.Router();
 const util = require('../../module/utils');
 const statusCode = require('../../module/statusCode');
-const Room = require('../../model/room');
+const Profile = require('../../model/profile');
 
 router.post('/', async (req, res) => {
     try {
-        const { accessToken, members, roomName } = req.body;
+        let { accessToken, nick, message, front, back } = req.body;
 
-        Room.create({ accessToken, members, roomName })
+        Profile.updateMyProfile({ accessToken, nick, message, front, back })
             .then(({ code, json }) => res.status(code).send(json))
             .catch(err => {
                 console.log(err);

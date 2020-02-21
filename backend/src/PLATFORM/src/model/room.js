@@ -19,11 +19,10 @@ module.exports = {
             let dataArray = []; // client에게 보내줄 data: []
 
             let getUserIdxResult = await jwtVerify.verifyAccessToken(accessToken);
-            console.log('AFTER VERIFIED:: ', getUserIdxResult);
             userIdx = getUserIdxResult.userIdx;
 
             let selectRoomInfoQuery = `
-            SELECT room.idx, room.room_name, room_person.last_msg_idx, room.mem_count, room.member
+            SELECT room.idx, room_person.room_name, room_person.last_msg_idx, room.mem_count, room.member
             FROM room_person, room
             WHERE room_person.room_idx = room.idx and room_person.user_idx = ? ; `;
 
@@ -87,13 +86,18 @@ module.exports = {
             FROM user
             WHERE idx IN (?) ` ;
 
+
             for (var i = 0; i < dataArray.length; i++) {
                 let selectedMemPhoto = await db.queryParam_Parse(selectMemPhotoQuery, [dataArray[i].members])
                 let mem_profile = [];
+                let room_profile = '';
                 for (var user = 0; user < selectedMemPhoto.length; user++) {
                     mem_profile.push(JSON.parse(selectedMemPhoto[user].profile).profile_front);
+                    if (dataArray[i].members[user] != userIdx) room_profile = JSON.parse(selectedMemPhoto[user].profile).profile_front;
+                    else continue;
                 }
                 dataArray[i].mem_profile = mem_profile;
+                dataArray[i].room_profile = room_profile;
             }
 
 
@@ -114,7 +118,7 @@ module.exports = {
 
         });
     },
-    // 채팅방 
+    // 채팅방 개설 시 친구 목록 조회
     friendList: ({ accessToken }) => {
         return new Promise(async (resolve, reject) => {
             let userIdx;
@@ -165,35 +169,64 @@ module.exports = {
 
         });
     },
-    create: ({ accessToken, members }) => {
+    create: ({ accessToken, members, roomName }) => {
         return new Promise(async (resolve, reject) => {
             let userIdx;
             let membersIdxArray = (JSON.parse(members)).members;
-            let membersNickArray = [];
-            let roomName = '';
-            let roomIdx;
             let insertOjbect = {};
+            let newRoomCreateFlag = false;
 
             let getUserIdxResult = await jwtVerify.verifyAccessToken(accessToken);
             userIdx = getUserIdxResult.userIdx;
+
             membersIdxArray.push(userIdx); // 내 idx 마지막에 추가
             insertOjbect.members = membersIdxArray;
 
-            let selectMemNickQuery = `
-            SELECT nick
-            FROM user
-            WHERE idx IN (?) `;
-            let selectedMemNick = await db.queryParam_Parse(selectMemNickQuery, [membersIdxArray]);
 
-            for (var i = 0; i < selectedMemNick.length; i++) {
-                if (selectedMemNick.length == 2) {
-                    roomName = selectedMemNick[0].nick;
-                } else {
-                    if (i < selectedMemNick.length - 1) roomName += selectedMemNick[i].nick + ", ";
-                    else if (i == selectedMemNick.length - 1) roomName += selectedMemNick[i].nick;
+            let selectRoomQuery = `
+            SELECT * 
+            FROM room, room_person 
+            WHERE room.idx = room_person.room_idx and room_person.user_idx = ? `;
+            let selectedRoom = await db.queryParam_Parse(selectRoomQuery, [userIdx]);
+
+            // console.log('SELECTED ROOM:: ', selectedRoom);
+
+            let compareMemArray = [];
+            let sameCount = 0;
+            
+
+            if (selectedRoom.length == 0) newRoomCreateFlag = true;
+            else {
+                for (var i in selectedRoom) {
+                    if (JSON.parse(selectedRoom[i].member).members.length == membersIdxArray.length) compareMemArray.push(selectedRoom[i]);
+                    else continue;
+                }
+
+                for (var i in compareMemArray) {
+                    for (var j in compareMemArray[i].member) {
+                        let membersArray = JSON.parse(selectedRoom[i].member).members;
+                        
+                        for (var k in membersIdxArray){
+                            if (membersIdxArray[k] == membersArray[j]) {
+                                if (sameCount == membersIdxArray.length) {
+                                    newRoomCreateFlag = false;
+                                    break;
+                                }
+                                else sameCount += 1;
+                                
+                            }
+                            else continue;
+                        }
+
+                        
+                        
+                    }
                 }
             }
 
+
+
+/*
             let insertRoomQuery = `
             INSERT INTO room
             VALUES(?,?,?,?,?,?) `;
@@ -211,6 +244,94 @@ module.exports = {
                 code: 200,
                 json: util.successTrueNoData(statusCode.OK, "채팅방 개설 성공")
             });
+            */
+        });
+        
+    },
+    privateChat: ({ accessToken, friendIdx }) => {
+        return new Promise(async (resolve, reject) => {
+            let userIdx;
+            let twoMembersRooms = []; // 2명만 있는 채팅방 info 배열
+            let newRoomCreateFlag = false;
+            let realRoomIdx;
+
+            let membersIdxArray = [];
+            let membersObject = {};
+
+            let getUserIdxResult = await jwtVerify.verifyAccessToken(accessToken);
+            userIdx = getUserIdxResult.userIdx;
+
+            let selectRoomInfoQuery = `
+            SELECT * 
+            FROM room, room_person 
+            WHERE room.idx = room_person.room_idx and room_person.user_idx = ? `;
+            let selectedRoomInfo = await db.queryParam_Parse(selectRoomInfoQuery, [userIdx]);
+
+            if (selectedRoomInfo.length != 0) {
+                for (var i in selectedRoomInfo) {
+                    let members = JSON.parse(selectedRoomInfo[i].member).members;
+                    if (members.length == 2) twoMembersRooms.push(selectedRoomInfo[i])
+                    else continue;
+                }
+
+                if (twoMembersRooms.length != 0) {
+                    console.log('TWO:: ', twoMembersRooms);
+                    for (var j in twoMembersRooms) {
+                        let membersInRoomIdxArray = JSON.parse(twoMembersRooms[j].member).members;
+                        let plusMembersIdx = membersInRoomIdxArray[0] + membersInRoomIdxArray[1];
+                        if (plusMembersIdx == parseInt(userIdx) + parseInt(friendIdx)) {
+                            newRoomCreateFlag = false;
+                            realRoomIdx = twoMembersRooms[j].room_idx;
+                            break;
+                        }
+                        else if (j == twoMembersRooms.length - 1) newRoomCreateFlag = true;
+                        else continue;
+                    }
+                }
+                else { // 2명이 있는 채팅방이 아예 없다면
+                    newRoomCreateFlag = true;
+                }
+            }
+            else newRoomCreateFlag = true; // 속해있는 채팅방이 아예 없다면
+
+
+            if (newRoomCreateFlag == true) { // 채팅방 만들기
+                membersIdxArray.push(parseInt(friendIdx));
+                membersIdxArray.push(parseInt(userIdx));
+                membersObject.members = membersIdxArray;
+
+                let selectMemNickQuery = `
+                SELECT nick
+                FROM user
+                WHERE idx IN (?) `;
+                let selectedMemNick = await db.queryParam_Parse(selectMemNickQuery, [membersIdxArray]);
+
+                let insertRoomQuery = `
+                INSERT INTO room
+                VALUES(?,?,?,?,?,?) `;
+                let insertedRoom = await db.queryParam_Parse(insertRoomQuery, [null, JSON.stringify(membersObject), membersIdxArray.length, moment.now(), moment.now(), null]);
+
+                let insertRoomPersonQuery = `
+                INSERT INTO room_person
+                VALUES(?,?,?,?,?,?,?,?) `;
+
+                for (var idx in membersIdxArray) {
+                    let insertedRoomPerson = await db.queryParam_Parse(insertRoomPersonQuery, [null, membersIdxArray[idx], insertedRoom.insertId, selectedMemNick[idx].nick, null, null, 0, 0, null]);
+                }
+
+                resolve({
+                    code: 200,
+                    json: util.successTrue(statusCode.OK, "채팅방 개설 성공", { 'roomIdx': insertedRoom.insertId })
+                });
+
+            }
+            else if (newRoomCreateFlag == false) {
+                resolve({
+                    code: 200,
+                    json: util.successTrue(statusCode.OK, "원래 있는 룸 인덱스 불러오기 성공", { 'roomIdx': realRoomIdx })
+                });
+            }
+
         });
     }
 };

@@ -30,7 +30,7 @@
                                     <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain></v-img>
                             </v-avatar>
                              <v-avatar v-else contain p-0 m-0 wrap> <!-- 멤버 수 2명일 때 -->
-                                    <v-img :src="(room.mem_profile[index])" class="img-user" contain></v-img>
+                                    <v-img :src="(room.room_profile)" class="img-user" contain></v-img>
                             </v-avatar>
 
                             <v-flex>
@@ -71,9 +71,10 @@
 
                         </v-flex>
 
+                        <v-text-field class="editRoomNameTF" v-model="roomName" placeholder="방 이름을 입력해주세요" required dense filled hide-details="auto"></v-text-field>
+
                         <v-btn medium color="normal" class='btn-cancel' @click="createRoomClicked=false">취소</v-btn>
                         <v-btn medium color="normal" class='btn-create' type="submit">초대하기</v-btn>
-
                     </form>
                 </v-card>
             </v-dialog>
@@ -89,7 +90,9 @@ export default {
       preUrl: '',
       createRoomClicked: false,
       checkedIdx: [],
-      rooms: []
+      rooms: [],
+      roomName: ''
+    //   showRoomOneProfile: 1
     }
   },
   methods: {
@@ -115,25 +118,22 @@ export default {
         accessToken: this.userToken
       }
       this.$store.dispatch('getRoomList', object)
-    //   this.rooms = this.$store.$state.roomList
     },
     createRoom () {
       if (this.checkedIdx.length === 0) alert('친구를 한명 이상 추가해주세요.')
       else {
         let tempObject = {}
         tempObject.members = this.checkedIdx
-        console.log('object:: ', tempObject)
         let tempCheckedIdx = JSON.stringify(tempObject)
         const object = {
           accessToken: this.userToken,
-          members: tempCheckedIdx
+          members: tempCheckedIdx,
+          roomName: this.roomName
         }
         this.$store.dispatch('createRoom', object)
         this.createRoomClicked = false
         this.$store.dispatch('getRoomList', object)
         location.reload('/')
-
-        // this.getRoomList()
       }
     }
   },
@@ -144,7 +144,8 @@ export default {
       userIdx: 'idxInfo',
       inRoomDetails: 'inRoomDetails',
       friends: 'friendList',
-      roomIdx: 'roomIdx'
+      roomIdx: 'roomIdx',
+      myProfileFront: 'profileFrontInfo'
     })
   },
   created: function () {
@@ -237,5 +238,12 @@ export default {
 .btn-cancel {
     width: 10%;
     margin-left: 30%;
+}
+.editRoomNameTF {
+    text-align: center;
+    margin-top: 3%;
+    margin-bottom: 3%;
+    margin-left: 20%;
+    margin-right: 20%;
 }
 </style>

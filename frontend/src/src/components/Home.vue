@@ -45,7 +45,7 @@
                     </v-flex>
                     <v-flex v-for="(friend, index) in friendList" :key="index" row wrap grid-list-md ml-1 p-0>
                         <v-avatar wrap p-0 m-0>
-                            <v-img :src="(friend.profile_front)" class="img-user" contain @click="friendProfileClicked=true"></v-img>
+                            <v-img :src="(friend.profile_front)" class="img-user" contain @click="friendProfileClick(friend.user_idx)"></v-img>
                         </v-avatar>
 
                         <v-flex>
@@ -60,12 +60,12 @@
             <v-dialog v-model="myProfileClicked" max-width="350">
                 <v-card class="profileCard">
                     <!-- 배경 사진 -->
-                    <img src="../assets/ming.jpeg" class="profileDetailBack"/>
+                    <img :src="(userProfileBack)" class="profileDetailBack"/>
                     <!-- 프로필 사진 -->
-                    <img src="../assets/empty-profile.png"  class="profileDetailFront"/>
+                    <img :src="(userProfileFront)"  class="profileDetailFront"/>
 
-                    <span class="profileDetailText">홍길동</span>
-                    <span class="profileDetailText" style="top:70%">상태메세지</span>
+                    <span class="profileDetailText">{{ userNick }}</span>
+                    <span class="profileDetailText" style="top:70%">{{ userIntro }}</span>
 
                     <div class="row" style="text-align:center;">
                         <div class="col-6" style="position: absolute; top: 76%; left: 15%; width: 50px;"><img src="../assets/speech-bubble.png" style="width: 50px;"/></div>
@@ -83,20 +83,21 @@
             <v-dialog v-model="editProfileClicked" max-width="350">
                 <v-card class="profileCard">
                     <span style="position: absolute; left: 5%; top: 3%; color: #ffffff; cursor: pointer;" @click="editProfileClicked=false; myProfileClicked=true;">취소</span>
-                    <span style="position: absolute; right: 5%; top: 3%; color: #ffffff; cursor: pointer;" @click="editProfileClicked=false; myProfileClicked=true;">완료</span>
+                    <span style="position: absolute; right: 5%; top: 3%; color: #ffffff; cursor: pointer;" @click="updateMyProfile()">완료</span>
 
                     <!-- 배경 사진 -->
-                    <img src="../assets/ming2.jpeg" class="profileDetailBack"/>
+                    <img :src="(userProfileBack)" class="profileDetailBack"/>
                     <img src="../assets/camera.png" style="width: 10%; cursor: pointer; position: absolute; left: 44.5%; top: 20%;"/>
 
                     <!-- 프로필 사진 -->
-                    <img src="../assets/empty-profile.png"  class="profileDetailFront"/>
+                    <img :src="(userProfileFront)"  class="profileDetailFront"/>
                     <img src="../assets/camera.png" style="width: 10%; cursor: pointer; position: absolute; left: 55%; top: 59%;"/>
 
                     <!-- 닉네임 & 상태메세지 수정 -->
-                    <v-text-field class="editNickTF" dense v-bind:value="userNick" counter="20"></v-text-field>
+                    <!-- v-bind:value="userNick" -->
+                    <v-text-field type="text" class="editNickTF" dense v-model="editNickValue" counter="20"></v-text-field>
                     <img src="../assets/profile-edit.png" style="position: absolute; top: 67.5%; left: 85%; width: 5%;"/>
-                    <v-text-field class="editIntroTF" dense v-bind:value="userIntro" counter="20"></v-text-field>
+                    <v-text-field class="editIntroTF" dense v-model="editMessageValue" counter="20"></v-text-field>
                     <img src="../assets/profile-edit.png" style="position: absolute; top: 74.5%; left: 85%; width: 5%;"/>
 
                 </v-card>
@@ -106,15 +107,15 @@
             <v-dialog v-model="friendProfileClicked" max-width="350">
                 <v-card class="profileCard">
                     <!-- 배경 사진 -->
-                    <img src="../assets/ming.jpeg" class="profileDetailBack"/>
+                    <img :src="(friendProfileDetail.profile_back)" class="profileDetailBack"/>
                     <!-- 프로필 사진 -->
-                    <img src="../assets/empty-profile.png"  class="profileDetailFront"/>
+                    <img :src="(friendProfileDetail.profile_front)"  class="profileDetailFront"/>
 
-                    <span class="profileDetailText">홍길동</span>
-                    <span class="profileDetailText" style="top:70%">상태메세지</span>
+                    <span class="profileDetailText">{{ friendProfileDetail.user_nick }}</span>
+                    <span class="profileDetailText" style="top:70%">{{ friendProfileDetail.profile_message }}</span>
 
                     <img src="../assets/speech-bubble.png" style="position:absolute; top:77%; left:43%; width: 50px;"/>
-                    <span style="position:absolute; top:85%; left:42%; color: #ffffff;">1:1 채팅</span>
+                    <span style="position:absolute; top:85%; left:42%; color: #ffffff;" @click="privateChatClick()">1:1 채팅</span>
                 </v-card>
             </v-dialog>
 
@@ -280,7 +281,9 @@ export default {
       idSearchClicked: 0,
       acceptClicked: [],
       emailInput: '',
-      idInput: ''
+      idInput: '',
+      editNickValue: '',
+      editMessageValue: ''
     }
   },
   methods: {
@@ -366,6 +369,33 @@ export default {
     },
     sendRequestBtnClick () {
       console.log('send request btn clicked')
+    },
+    friendProfileClick (userIdx) {
+      this.friendProfileClicked = true
+      const object = {
+        friendIdx: userIdx
+      }
+      var payload = {
+        object: object,
+        accessToken: this.userToken
+      }
+      this.$store.dispatch('getFriendProfileDetail', payload)
+    },
+    updateMyProfile () {
+      this.editProfileClicked = false
+      this.myProfileClicked = true
+      console.log('NICK:: ', this.editNickValue)
+      const payload = {
+        accessToken: this.userToken,
+        nick: this.editNickValue,
+        front: 'https://sopt25.s3.ap-northeast-2.amazonaws.com/ming2.jpeg',
+        back: 'https://i.pinimg.com/474x/e5/39/a0/e539a00e8324eba1bac132dae05152d5.jpg',
+        message: this.editMessageValue
+      }
+      this.$store.dispatch('updateMyProfile', payload)
+    },
+    privateChatClick () {
+
     }
 
   },
@@ -379,7 +409,8 @@ export default {
       userProfileFront: 'profileFrontInfo',
       userProfileBack: 'profileBackInfo',
       friendList: 'homeList',
-      searchResultList: 'searchResultList'
+      searchResultList: 'searchResultList',
+      friendProfileDetail: 'friendProfileDetail'
     })
   },
   created: function () {
@@ -391,6 +422,9 @@ export default {
     this.$store.dispatch('getHomeList', object)
 
     this.$store.dispatch('resetSearchResult')
+
+    this.editNickValue = this.userNick
+    this.editMessageValue = this.userIntro
   }
 }
 </script>

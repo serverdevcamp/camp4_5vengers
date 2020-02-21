@@ -33,7 +33,8 @@ module.exports = {
                 let selectFriendInfoQuery = `
                 SELECT idx, nick, profile
                 FROM user
-                WHERE idx IN (?) `;
+                WHERE idx IN (?)
+                ORDER BY nick `;
 
                 let selectedFriendInfo = await db.queryParam_Parse(selectFriendInfoQuery, [friendsIdxArray])
 
@@ -57,6 +58,39 @@ module.exports = {
             }
 
 
+        });
+    },
+
+    // 친구 프로필 상세보기
+    friendProfile: ({ accessToken, friendIdx }) => {
+        return new Promise(async (resolve, reject) => {
+            let userIdx;
+            let dataArray = []; // client에게 보내줄 data: []
+
+            let getUserIdxResult = await jwtVerify.verifyAccessToken(accessToken);
+            userIdx = getUserIdxResult.userIdx;
+
+            let selectFriendInfoQuery = `
+            SELECT idx, nick, profile
+            FROM user
+            WHERE idx = ? `;
+            let selectedFriendInfo = await db.queryParam_Parse(selectFriendInfoQuery, [friendIdx]);
+
+            let friendInfo = {};
+            friendInfo.user_idx = selectedFriendInfo[0].idx;
+            friendInfo.user_nick = selectedFriendInfo[0].nick;
+            friendInfo.profile_front = JSON.parse(selectedFriendInfo[0].profile).profile_front;
+            friendInfo.profile_back = JSON.parse(selectedFriendInfo[0].profile).profile_back;
+            friendInfo.profile_message = JSON.parse(selectedFriendInfo[0].profile).profile_message;
+
+            dataArray.push(friendInfo);
+
+            console.log('data:: ', dataArray);
+
+            resolve({
+                code: 200,
+                json: util.successTrue(statusCode.OK, "친구 프로필 상세 조회 성공", dataArray)
+            });
         });
     }
 };

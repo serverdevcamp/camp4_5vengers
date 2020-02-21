@@ -116,5 +116,14 @@ export const Mutations = {
   },
   inviteFriendSuccess (state, payload) {
 
+  },
+  getFriendProfileDetailSuccess (state, payload) {
+    state.friendProfileDetail = payload[0]
+  },
+  updateMyProfileSuccess (state, payload) {
+    state.userIntro = payload.profile_message
+    state.userNick = payload.user_nick
+    state.userProfileFront = payload.profile_front
+    state.userProfileBack = payload.profile_back
   }
 }

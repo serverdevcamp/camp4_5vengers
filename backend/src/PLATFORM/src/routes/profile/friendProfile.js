@@ -2,13 +2,14 @@ var express = require('express');
 var router = express.Router();
 const util = require('../../module/utils');
 const statusCode = require('../../module/statusCode');
-const Room = require('../../model/room');
+const Profile = require('../../model/profile');
 
 router.post('/', async (req, res) => {
     try {
-        const { accessToken, members, roomName } = req.body;
+        let accessToken = req.headers.accesstoken;
+        let friendIdx = req.body.friendIdx;
 
-        Room.create({ accessToken, members, roomName })
+        Profile.friendProfile({ accessToken, friendIdx })
             .then(({ code, json }) => res.status(code).send(json))
             .catch(err => {
                 console.log(err);

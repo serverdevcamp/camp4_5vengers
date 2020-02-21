@@ -163,5 +163,23 @@ export const Actions = {
         commit('inviteFriendSuccess')
       }
     })
+  },
+  getFriendProfileDetail ({ commit }, payload) {
+    axios.post('http://localhost:3003/profile/friendProfile', payload.object, {
+      headers: {
+        'accesstoken': payload.accessToken
+      }
+    }).then(response => {
+      if (response.data.status === 200) {
+        commit('getFriendProfileDetailSuccess', response.data.data)
+      }
+    })
+  },
+  updateMyProfile ({ commit }, payload) {
+    axios.post('http://localhost:3003/profile/updateMyProfile', payload).then(response => {
+      if (response.data.status === 200) {
+        commit('updateMyProfileSuccess', response.data.data)
+      }
+    })
   }
 }

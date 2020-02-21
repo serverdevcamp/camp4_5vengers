@@ -72,3 +72,12 @@ export const homeListGetters = {
     return state.homeList
   }
 }
+
+export const profileDetailGetters = {
+  friendProfileDetail (state, getters) {
+    return state.friendProfileDetail
+  },
+  myProfileDetail (state, getters) {
+    return state.myProfileDetail
+  }
+}
