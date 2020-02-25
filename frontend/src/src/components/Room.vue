@@ -133,7 +133,7 @@ export default {
         this.$store.dispatch('createRoom', object)
         this.createRoomClicked = false
         this.$store.dispatch('getRoomList', object)
-        location.reload('/')
+        this.$router.push('/roomDetails')
       }
     }
   },

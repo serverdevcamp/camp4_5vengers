@@ -235,19 +235,19 @@ module.exports = {
                 let insertRoomQuery = `
                 INSERT INTO room
                 VALUES(?,?,?,?,?,?) `;
-                let insertedUser = await db.queryParam_Parse(insertRoomQuery, [null, JSON.stringify(insertOjbect), membersIdxArray.length, moment.now(), moment.now(), roomName]);
+                let insertedRoom = await db.queryParam_Parse(insertRoomQuery, [null, JSON.stringify(insertOjbect), membersIdxArray.length, moment.now(), moment.now(), roomName]);
     
                 let insertRoomPersonQuery = `
                 INSERT INTO room_person
                 VALUES(?,?,?,?,?,?,?,?) `;
     
                 for (var idx = 0; idx < membersIdxArray.length; idx++) {
-                    let insertedRoomPerson = await db.queryParam_Parse(insertRoomPersonQuery, [null, membersIdxArray[idx], insertedUser.insertId, roomName, null, null, 0, 0, null]);
+                    let insertedRoomPerson = await db.queryParam_Parse(insertRoomPersonQuery, [null, membersIdxArray[idx], insertedRoom.insertId, roomName, null, null, 0, 0, null]);
                 }
     
                 resolve({
                     code: 200,
-                    json: util.successTrueNoData(statusCode.OK, "채팅방 개설 성공")
+                    json: util.successTrue(statusCode.OK, "채팅방 개설 성공", insertedRoom.insertId)
                 });    
             }
         });

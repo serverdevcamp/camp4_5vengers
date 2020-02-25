@@ -87,6 +87,7 @@ export const Actions = {
   createRoom ({ commit }, payload) {
     axios.post('http://localhost:3003/room/create', payload).then(response => {
       if (response.data.status === 200) {
+        commit('createRoomSuccess', response.data)
       }
     })
   },

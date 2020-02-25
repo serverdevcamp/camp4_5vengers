@@ -115,5 +115,8 @@ export const Mutations = {
     state.userNick = payload.user_nick
     state.userProfileFront = payload.profile_front
     state.userProfileBack = payload.profile_back
+  },
+  createRoomSuccess (state, payload) {
+    state.room_idx = payload.data
   }
 }
