@@ -175,6 +175,7 @@ module.exports = {
             let membersIdxArray = (JSON.parse(members)).members;
             let insertOjbect = {};
             let newRoomCreateFlag = false;
+            let sameRoomIdx;
 
             let getUserIdxResult = await jwtVerify.verifyAccessToken(accessToken);
             userIdx = getUserIdxResult.userIdx;
@@ -182,19 +183,16 @@ module.exports = {
             membersIdxArray.push(userIdx); // 내 idx 마지막에 추가
             insertOjbect.members = membersIdxArray;
 
-
             let selectRoomQuery = `
             SELECT * 
             FROM room, room_person 
             WHERE room.idx = room_person.room_idx and room_person.user_idx = ? `;
             let selectedRoom = await db.queryParam_Parse(selectRoomQuery, [userIdx]);
 
-            // console.log('SELECTED ROOM:: ', selectedRoom);
 
             let compareMemArray = [];
             let sameCount = 0;
             
-
             if (selectedRoom.length == 0) newRoomCreateFlag = true;
             else {
                 for (var i in selectedRoom) {
@@ -203,49 +201,57 @@ module.exports = {
                 }
 
                 for (var i in compareMemArray) {
-                    for (var j in compareMemArray[i].member) {
-                        let membersArray = JSON.parse(selectedRoom[i].member).members;
-                        
-                        for (var k in membersIdxArray){
-                            if (membersIdxArray[k] == membersArray[j]) {
+                    let membersArray = JSON.parse(compareMemArray[i].member).members;
+                    for (var j in membersIdxArray) {
+                        for (var k in membersArray){
+                            if (membersIdxArray[j] == membersArray[k]) {
                                 if (sameCount == membersIdxArray.length) {
                                     newRoomCreateFlag = false;
+                                    sameRoomIdx = compareMemArray[i].room_idx
                                     break;
                                 }
-                                else sameCount += 1;
-                                
+                                else {
+                                    sameCount += 1;
+                                }
                             }
-                            else continue;
+                            else {
+                                newRoomCreateFlag = true;
+                                continue;
+                            }
                         }
-
-                        
-                        
                     }
+                        
                 }
             }
 
 
-
-/*
-            let insertRoomQuery = `
-            INSERT INTO room
-            VALUES(?,?,?,?,?,?) `;
-            let insertedUser = await db.queryParam_Parse(insertRoomQuery, [null, JSON.stringify(insertOjbect), membersIdxArray.length, moment.now(), moment.now(), roomName]);
-
-            let insertRoomPersonQuery = `
-            INSERT INTO room_person
-            VALUES(?,?,?,?,?,?,?,?) `;
-
-            for (var idx = 0; idx < membersIdxArray.length; idx++) {
-                let insertedRoomPerson = await db.queryParam_Parse(insertRoomPersonQuery, [null, membersIdxArray[idx], insertedUser.insertId, roomName, null, null, 0, 0, null]);
+            if (newRoomCreateFlag == false) {
+                resolve({
+                    code: 200,
+                    json: util.successTrue(statusCode.OK, "동일한 채팅방 인덱스 조회 성공", sameRoomIdx)
+                });
             }
-
-            resolve({
-                code: 200,
-                json: util.successTrueNoData(statusCode.OK, "채팅방 개설 성공")
-            });
-            */
+            else {
+                let insertRoomQuery = `
+                INSERT INTO room
+                VALUES(?,?,?,?,?,?) `;
+                let insertedUser = await db.queryParam_Parse(insertRoomQuery, [null, JSON.stringify(insertOjbect), membersIdxArray.length, moment.now(), moment.now(), roomName]);
+    
+                let insertRoomPersonQuery = `
+                INSERT INTO room_person
+                VALUES(?,?,?,?,?,?,?,?) `;
+    
+                for (var idx = 0; idx < membersIdxArray.length; idx++) {
+                    let insertedRoomPerson = await db.queryParam_Parse(insertRoomPersonQuery, [null, membersIdxArray[idx], insertedUser.insertId, roomName, null, null, 0, 0, null]);
+                }
+    
+                resolve({
+                    code: 200,
+                    json: util.successTrueNoData(statusCode.OK, "채팅방 개설 성공")
+                });    
+            }
         });
+        
         
     },
     privateChat: ({ accessToken, friendIdx }) => {

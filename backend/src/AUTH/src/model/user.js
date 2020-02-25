@@ -78,12 +78,11 @@ module.exports = {
                     for (var i in selectedInvite) {
                         await db.queryParam_Parse(insertRequestQuery, [null, insertUserResult.insertId, selectedInvite[i].from, 0])
                     }
+                    let deleteInviteQuery = `
+                    DELETE FROM friends_invite
+                    WHERE email = ? `;
+                    let deletedInvite = await db.queryParam_Parse(deleteInviteQuery, [email]);
                 }
-
-                let deleteInviteQuery = `
-                DELETE FROM friends_invite
-                WHERE email = ? `;
-                let deletedInvite = await db.queryParam_Parse(deleteInviteQuery, [email]);
 
                 // 이메일 전송 옵션 설정
                 let mailOptions = {
