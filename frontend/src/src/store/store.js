@@ -26,7 +26,7 @@ export const store = new Vuex.Store({
     roomList: [],
     readCount: [8],
     inRoomDetails: 0,
-    freindList: [],
+    friendList: [],
     sendRequestList: [],
     receiveRequestList: [],
     homeList: [],

@@ -110,7 +110,6 @@ export default {
         accessToken: this.userToken
       }
       this.$store.dispatch('getFriendList', object)
-      console.log('DATA:: ', this.friends)
     //   this.createRoomClicked = false
     },
     getRoomList () {
