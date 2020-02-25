@@ -7,6 +7,7 @@
                         <v-img :src="('https://cdn.vuetifyjs.com/images/john.jpg')" class="img-user" contain></v-img>
                     </v-avatar>
 
+                    <!--아이콘 클릭시 친구목록 보여준다-->
                     <v-flex>
                         <v-flex wrap v-model="room_name" class="chat-name" v-bind:value="room_name" text-md-center mx-1 pb-1 md1>{{ room_name }}</v-flex>
                         <v-flex row grid-list-md ml-3 p-0>

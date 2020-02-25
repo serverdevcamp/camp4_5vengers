@@ -16,7 +16,7 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 3002;
 var Redis = require('ioredis');
-var redis_address = process.env.REDIS_ADDRESS || 'redis://10.99.13.29:6379';
+var redis_address = process.env.REDIS_ADDRESS || 'redis://127.0.0.1:6379';
 var redis = new Redis(redis_address);
 
 var redis_subscribers = {};
