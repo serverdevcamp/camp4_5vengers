@@ -17,8 +17,8 @@ export const Mutations = {
     state.userProfileFront = payload.data[0].profileFront
     state.userProfileBack = payload.data[0].profileBack
 
-    VueCookies.set('accessToken', payload.data[0].accessToken, '1d')
-    VueCookies.set('refreshToken', payload.data[0].refreshToken, '2d')
+    VueCookies.set('accessToken', payload.data[0].accessToken, '30s')
+    VueCookies.set('refreshToken', payload.data[0].refreshToken, '60s')
 
     if (payload.data[0].status === 1) router.push('/home')
     else router.push('/auth')
@@ -118,5 +118,8 @@ export const Mutations = {
   },
   createRoomSuccess (state, payload) {
     state.room_idx = payload.data
+  },
+  setAccessTokenSuccess (state, payload) {
+    state.setAccessToken = payload
   }
 }

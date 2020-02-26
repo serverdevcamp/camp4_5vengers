@@ -6,12 +6,12 @@ const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const jwtCreate = require('../module/jwtCreate');
 const nodemailer = require('nodemailer');
-// const _redis = require('redis');
+const _redis = require('redis');
 const secretEmail = require('../config/email');
-// const redisClient = _redis.createClient({
-//     host: "127.0.0.1",
-//     port: 6379 // redis 기본 포트번호
-// });
+const redisClient = _redis.createClient({
+    host: "127.0.0.1",
+    port: 6379 // redis 기본 포트번호
+});
 
 // nodemailer 설정
 let transporter = nodemailer.createTransport({
@@ -64,6 +64,7 @@ module.exports = {
                 VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?); `;
                 let insertUserResult = await db.queryParam_Parse(insertUserQuery, [null, name, id, email, pwd, nick, salt, now, now, null, 0, JSON.stringify(tempProfile), '{"friends":[]}', verifyCode, null]);
 
+                // 초대받은 사람인지 체크
                 let selectInviteQuery = `
                 SELECT *
                 FROM friends_invite
@@ -155,11 +156,30 @@ module.exports = {
                     let tempAccessToken = await jwtCreate.createAccessToken(payload);
                     let tempRefreshToken = await jwtCreate.createRefreshToken(payload);
 
-                    let updateRefreshTokenQuery = `
-                    UPDATE user 
-                    SET refresh_token = ? 
-                    WHERE id = ? `;
-                    let updateRefreshTokenResult = await db.queryParam_Parse(updateRefreshTokenQuery, [tempRefreshToken, id]);
+                    // redis에 유저 아이디-리프레시토큰 저장 (원래 있으면 삭제하고 저장)
+                    redisClient.hget('users', id, (err, reply) => {
+                        console.log('REPLY:: ', reply);
+                        if (err) console.log(err);
+                        else {
+                            if (reply != null) {
+                                redisClient.hdel('users', id, function (err, response) {
+                                    if (response == 1) console.log("redis에서 리프레시 토큰 삭제 완료");
+                                    else console.log("redis에서 리프레시 토큰 삭제 실패");
+                                });
+                            }
+
+                            redisClient.hset('users', id, tempRefreshToken, function (err, data) {
+                                if (err) {
+                                    console.log(err);
+                                    res.send("error " + err);
+                                    return;
+                                } else {
+                                    console.log('레디스에 저장');
+                                    redisClient.expire(id, parseInt(60)); // 1분 뒤 만료
+                                }
+                            });
+                        }
+                    });
 
                     let resultArray = [];
                     let userInfo = {};
@@ -197,6 +217,14 @@ module.exports = {
             WHERE id = ? `;
             let selectUserResult = await db.queryParam_Arr(selectUserQuery, [decodeResult.userId]);
 
+            let payload = {
+                userIdx: selectUserResult[0].idx,
+                userId: selectUserResult[0].id,
+                userName: selectUserResult[0].name,
+                userEmail: selectUserResult[0].email
+            };
+            let tempAccessToken = await jwtCreate.createAccessToken(payload);
+
             if (selectUserResult.length == 0) {
                 resolve({
                     code: 201,
@@ -204,36 +232,31 @@ module.exports = {
                 });
                 return;
             } else {
-                let checkRightTokenQuery = `
-                SELECT *
-                FROM user
-                WHERE id = ? and refresh_token = ? `;
-                let checkRightTokenResult = await db.queryParam_Parse(checkRightTokenQuery, [decodeResult.userId, refreshToken]);
-                if (checkRightTokenResult.length == 0) {
-                    resolve({
-                        code: 201,
-                        json: util.successFalse(statusCode.TOKEN_NOT_SAME, "토큰이 일치하지 않습니다.")
-                    });
-                    return;
-                } else {
-                    let payload = {
-                        userIdx: checkRightTokenResult[0].idx,
-                        userId: checkRightTokenResult[0].id,
-                        userName: checkRightTokenResult[0].name,
-                        userEmail: checkRightTokenResult[0].email
-                    };
-                    let tempAccessToken = await jwtCreate.createAccessToken(payload);
-                    let resultArray = [];
-                    let userInfo = {};
 
-                    userInfo.accessToken = tempAccessToken;
-                    resultArray.push(userInfo);
+                // 리프레시 토큰 일치한지 확인 
+                redisClient.hget('users', decodeResult.userId, (err, reply) => {
+                    if (err) console.log(err);
+                    else {
+                        if (reply == null) {
+                            resolve({
+                                code: 201,
+                                json: util.successFalse(statusCode.TOKEN_NOT_SAME, "토큰이 일치하지 않습니다.")
+                            });
+                        }
+                        else {
+                            let resultArray = [];
+                            let userInfo = {};
 
-                    resolve({
-                        code: 200,
-                        json: util.successTrue(statusCode.OK, "ACCESS 토큰 재발급 성공", resultArray)
-                    });
-                }
+                            userInfo.accessToken = tempAccessToken;
+                            resultArray.push(userInfo);
+
+                            resolve({
+                                code: 200,
+                                json: util.successTrue(statusCode.OK, "ACCESS 토큰 재발급 성공", resultArray)
+                            });
+                        }
+                    }
+                });
             }
         });
     },
