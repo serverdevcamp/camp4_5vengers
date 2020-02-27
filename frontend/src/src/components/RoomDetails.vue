@@ -9,7 +9,7 @@
 
                     <!--아이콘 클릭시 친구목록 보여준다-->
                     <v-flex>
-                        <v-flex wrap v-model="room_name" class="chat-name" v-bind:value="room_name" text-md-center mx-1 pb-1 md1>{{ room_name }}</v-flex>
+                        <v-flex wrap v-model="room" class="chat-name" v-bind:value="room" text-md-center mx-1 pb-1 md1>{{ room }}</v-flex>
                         <v-flex row grid-list-md ml-3 p-0>
                             <!-- <v-flex class="icon-num" text-md-left md1 pb-0> -->
                                 <img src="../assets/user.png" class="icon-user"/>
@@ -100,7 +100,7 @@ export default {
   data () {
     return {
       settingsClicked: false,
-      room_name: this.room,
+      room_name: '',
       mem_count: '',
       message: '',
       messages: [], // 내가 아닌 타인이 보낸 메세지
@@ -177,6 +177,7 @@ export default {
     this.readCount_idx = -1
     this.$store.dispatch('inRoomDetails')
     // 들어올 때마다 last이후의 메세지들의 reader에 자기 자신 idx추가하고 regist_count-- 하기!
+    console.log('여기여기여기여기:', this.roomIdx)
     var info = ({
       userIdx: this.userIdx, // 일단 임시로 userIdx 8인 유저로 test
       roomIdx: this.roomIdx

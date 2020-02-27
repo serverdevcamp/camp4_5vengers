@@ -41,7 +41,7 @@ module.exports = {
     },
     updateOnline : (room_idx, user_idx) => {
         return new Promise(async(resolve, reject) => {
-            console.log("유저 : ", user_idx)
+            console.log("방 이름 : ", room_idx)
             var offline = moment.now();
             const updateRoomQuery = 'UPDATE room_person SET online_dt = ?, status = ? WHERE user_idx = ? AND room_idx = ?';
             const updateRoomResult = await db.queryParam_Parse(updateRoomQuery ,[offline, 1, user_idx, room_idx]);
@@ -56,7 +56,7 @@ module.exports = {
                 code : 200,
                 json : util.successTrue(statusCode.HOME_SHOW_FAIL, resMessage.X_UPDATE_SUCCESS(room_on))
             });
-            return;
+            return;                
         });
     },
     getReadCount : (room_idx) => {
