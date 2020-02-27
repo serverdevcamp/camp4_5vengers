@@ -3,11 +3,11 @@ import router from '../router'
 
 export const Actions = {
   signUp ({ commit }, payload) {
-    axios.post('http://13.125.153.37:3000/user/signUp', payload).then(response => {
+    axios.post('http://localhost:3000/user/signUp', payload).then(response => {
       console.log('here actions')
       if (response.data.status === 201) {
         commit('signUpSuccess')
-        router.push('/home')
+        router.push('/signIn')
       } else if (response.data.status === 330) {
         commit('signUpFail')
         location.href = '/signUp?result=330'
