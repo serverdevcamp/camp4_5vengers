@@ -316,7 +316,7 @@ module.exports = {
                 from: secretEmail.user,
                 to: email,
                 subject: '안녕하세요, ' + userName + '님께서 5vengers에 초대했습니다!',
-                html: '<p>5vengers에 가입하여 ' + userName + '님과 소통해보는건 어떨까요?</p>'
+                html: '<p>5vengers에 가입하여 ' + userName + '님과 소통해보는건 어떨까요?</p>' + '<br>' + 'http://localhost:8080/signUp'
             };
 
             // 이메일 전송

@@ -7,13 +7,13 @@ const util = require('../module/utils');
 // access token 설정
 let accessOption = {
     algorithm: "HS512",
-    expiresIn: 30 * 1 // 30초
+    expiresIn: 60 * 15 // 15분
 }
 
 // refresh token 설정
 let refreshOption = {
     algorithm: "HS512",
-    expiresIn: 60 * 1 // 1분
+    expiresIn: 60 * 60 // 1시간
 }
 
 module.exports = {

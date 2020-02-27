@@ -114,8 +114,8 @@
                     <span class="profileDetailText">{{ friendProfileDetail.user_nick }}</span>
                     <span class="profileDetailText" style="top:70%">{{ friendProfileDetail.profile_message }}</span>
 
-                    <img src="../assets/speech-bubble.png" style="position:absolute; top:77%; left:43%; width: 50px;"/>
-                    <span style="position:absolute; top:85%; left:42%; color: #ffffff;" @click="privateChatClick()">1:1 채팅</span>
+                    <img src="../assets/speech-bubble.png" @click="privateChatClick(friendProfileDetail.user_idx)" style="position:absolute; top:77%; left:43%; width: 50px;"/>
+                    <span style="position:absolute; top:85%; left:42%; color: #ffffff;" @click="privateChatClick(friendProfileDetail.user_idx)">1:1 채팅</span>
                 </v-card>
             </v-dialog>
 
@@ -394,8 +394,13 @@ export default {
       }
       this.$store.dispatch('updateMyProfile', payload)
     },
-    privateChatClick () {
-
+    privateChatClick (idx) {
+      const payload = {
+        accessToken: this.userToken,
+        friendIdx: idx
+      }
+      this.$store.dispatch('goPrivateChat', payload)
+      this.$router.push('/roomDetails')
     }
 
   },

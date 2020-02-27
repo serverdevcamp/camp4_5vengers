@@ -176,5 +176,12 @@ export const Actions = {
   },
   setAccessToken ({ commit }, payload) {
     commit('setAccessTokenSuccess', payload)
+  },
+  goPrivateChat ({ commit }, payload) {
+    axios.post('http://localhost:3003/room/privateChat', payload).then(response => {
+      if (response.data.status === 200) {
+        commit('goPrivateChatSuccess', response.data.data)
+      }
+    })
   }
 }
