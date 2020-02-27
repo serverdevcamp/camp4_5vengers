@@ -170,7 +170,7 @@ export default {
     }
   },
   mounted: function () {
-    this.socket = io.connect('http://localhost:3002', { transports: ['websocket'], query: 'roomIdx=2' })// 여기에 room_idx를 전달해주기
+    this.socket = io.connect('http://localhost:3002', { transports: ['websocket'] })// 여기에 room_idx를 전달해주기
     // 일단 들어오면, db online_dt update 하기 && 읽은 메세지 수 update하기(만약 이 유저가 이미 읽은 메세지가 있으면 그대로 두고 안 읽은 메세지가 있으면 읽은 메세지 수 감소)
     // 채팅방 이름, 채팅방 인원수 불러오기
     // this.$store.room_idx = this.roomIdx
