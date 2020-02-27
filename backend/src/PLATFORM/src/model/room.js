@@ -327,14 +327,14 @@ module.exports = {
 
                 resolve({
                     code: 200,
-                    json: util.successTrue(statusCode.OK, "채팅방 개설 성공", { 'roomIdx': insertedRoom.insertId })
+                    json: util.successTrue(statusCode.OK, "채팅방 개설 성공", insertedRoom.insertId)
                 });
 
             }
             else if (newRoomCreateFlag == false) {
                 resolve({
                     code: 200,
-                    json: util.successTrue(statusCode.OK, "원래 있는 룸 인덱스 불러오기 성공", { 'roomIdx': realRoomIdx })
+                    json: util.successTrue(statusCode.OK, "원래 있는 룸 인덱스 불러오기 성공", realRoomIdx)
                 });
             }
 
