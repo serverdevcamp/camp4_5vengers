@@ -7,13 +7,13 @@
 
 ## Server Architecture
 
-![](https://mindgarden2.s3.ap-northeast-2.amazonaws.com/server_architecture_final.png)
+![](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fk.kakaocdn.net%2Fdn%2FbOdeYL%2FbtqEnhJLVK0%2FnPEYfG5thkWk2BN0SvefqK%2Fimg.png)
 
 
 
 ## DB ERD
 
-![](https://mindgarden2.s3.ap-northeast-2.amazonaws.com/db+erd.png)
+![](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fk.kakaocdn.net%2Fdn%2Fz0amb%2FbtqEnHBtujT%2FYO2C3trjQkWbnsbTKBWts1%2Fimg.png)
 
 
 
@@ -38,19 +38,19 @@
 
 ## 메시지 처리(Redis)
 
-![](https://mindgarden2.s3.ap-northeast-2.amazonaws.com/%EB%A9%94%EC%8B%9C%EC%A7%80+%EC%B2%98%EB%A6%AC(redis).png)
+![](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fk.kakaocdn.net%2Fdn%2Fbv2a57%2FbtqEoAhx9Hl%2FF1rCnEdZ1jUZFO25voTkKK%2Fimg.png)
 
 
 
 ## 읽은 메세지 처리 로직
 
-![](https://mindgarden2.s3.ap-northeast-2.amazonaws.com/%EC%9D%BD%EC%9D%80+%EB%A9%94%EC%84%B8%EC%A7%80+%EC%B2%98%EB%A6%AC%EB%A1%9C%EC%A7%81(1).png)
+![](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fk.kakaocdn.net%2Fdn%2FevSSOS%2FbtqEmwt9nyO%2F7hCArwbWxSwGA0S7D7MCOk%2Fimg.png)
 
 
 
 ## 실시간 읽은 메세지 처리 로직
 
-![](https://mindgarden2.s3.ap-northeast-2.amazonaws.com/%EC%9D%BD%EC%9D%80+%EB%A9%94%EC%8B%9C%EC%A7%80+%EC%B2%98%EB%A6%AC%EB%A1%9C%EC%A7%81(2).png)
+![](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fk.kakaocdn.net%2Fdn%2FDMro1%2FbtqEmoC5dlN%2FSao9u3tKofE9PKzvldzcPK%2Fimg.png)
 
 
 
